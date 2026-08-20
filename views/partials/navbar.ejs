@@ -1,0 +1,376 @@
+<!-- ==========================================================
+     DRINKIT — PROFESSIONAL USER NAVBAR
+========================================================== -->
+
+<link rel="stylesheet" href="/css/navbar.css">
+
+<nav class="drinkit-main-navbar">
+
+    <div class="drinkit-navbar-inner">
+
+        <!-- ==================================================
+             BRAND
+        ================================================== -->
+
+        <a href="/" class="drinkit-logo">
+
+            <span class="logo-icon">
+                <i class="bi bi-cup-straw"></i>
+            </span>
+
+            <span class="logo-text">
+                Drink<span>it</span>
+            </span>
+
+        </a>
+
+
+        <!-- ==================================================
+             DELIVERY / LOCATION
+        ================================================== -->
+
+        <div class="delivery-info">
+
+            <div class="delivery-title">
+                Delivery in <strong>30 minutes</strong>
+            </div>
+
+            <div class="delivery-location">
+
+                <i class="bi bi-geo-alt-fill"></i>
+
+                <span>Nagar, Maharashtra</span>
+
+                <i class="bi bi-chevron-down location-arrow"></i>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             SEARCH
+        ================================================== -->
+
+        <form
+            action="/products"
+            method="GET"
+            class="drinkit-search"
+        >
+
+            <i class="bi bi-search search-icon"></i>
+
+            <input
+                type="text"
+                name="search"
+                id="drinkitSearch"
+                placeholder='Search "wine", "beer", "snacks"...'
+                autocomplete="off"
+            >
+
+            <button
+                type="submit"
+                class="search-button"
+            >
+                Search
+            </button>
+
+        </form>
+
+
+        <!-- ==================================================
+             RIGHT ACTIONS
+        ================================================== -->
+
+        <div class="drinkit-actions">
+
+
+            <!-- ==============================================
+                 LANGUAGE
+            =============================================== -->
+
+            <div class="drinkit-language dropdown">
+
+                <button
+                    class="language-btn dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                >
+
+                    <i class="bi bi-translate"></i>
+
+                    <span>EN</span>
+
+                </button>
+
+
+                <ul class="dropdown-menu dropdown-menu-end language-dropdown">
+
+                    <li>
+
+                        <a
+                            class="dropdown-item active"
+                            href="?lang=en"
+                        >
+
+                            <span>
+                                English
+                            </span>
+
+                            <small>
+                                EN
+                            </small>
+
+                        </a>
+
+                    </li>
+
+
+                    <li>
+
+                        <a
+                            class="dropdown-item"
+                            href="?lang=mr"
+                        >
+
+                            <span>
+                                मराठी
+                            </span>
+
+                            <small>
+                                MR
+                            </small>
+
+                        </a>
+
+                    </li>
+
+
+                    <li>
+
+                        <a
+                            class="dropdown-item"
+                            href="?lang=hi"
+                        >
+
+                            <span>
+                                हिन्दी
+                            </span>
+
+                            <small>
+                                HI
+                            </small>
+
+                        </a>
+
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+            <!-- ==============================================
+                 LOGIN / USER
+            =============================================== -->
+
+            <% if (typeof user !== 'undefined' && user) { %>
+
+                <div class="dropdown">
+
+                    <button
+                        class="user-profile-btn dropdown-toggle"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                    >
+
+                        <span class="user-avatar">
+
+                            <i class="bi bi-person-fill"></i>
+
+                        </span>
+
+                        <span class="user-name">
+
+                            <%= user.first_name || "Account" %>
+
+                        </span>
+
+                    </button>
+
+
+                    <ul class="dropdown-menu dropdown-menu-end drinkit-user-dropdown">
+
+
+                        <li class="dropdown-user-info">
+
+                            <div class="dropdown-user-avatar">
+
+                                <i class="bi bi-person-fill"></i>
+
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    <%= user.first_name || "User" %>
+                                </strong>
+
+                                <small>
+                                    <%= user.email || "" %>
+                                </small>
+
+                            </div>
+
+                        </li>
+
+
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+
+                        <li>
+
+                            <a
+                                class="dropdown-item"
+                                href="/profile"
+                            >
+
+                                <i class="bi bi-person"></i>
+
+                                My Profile
+
+                            </a>
+
+                        </li>
+
+
+                        <li>
+
+                            <a
+                                class="dropdown-item"
+                                href="/orders"
+                            >
+
+                                <i class="bi bi-box-seam"></i>
+
+                                My Orders
+
+                            </a>
+
+                        </li>
+
+
+                        <li>
+
+                            <a
+                                class="dropdown-item"
+                                href="/wishlist"
+                            >
+
+                                <i class="bi bi-heart"></i>
+
+                                Wishlist
+
+                            </a>
+
+                        </li>
+
+
+                        <li>
+
+                            <a
+                                class="dropdown-item"
+                                href="/cart"
+                            >
+
+                                <i class="bi bi-bag"></i>
+
+                                My Cart
+
+                            </a>
+
+                        </li>
+
+
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+
+                        <li>
+
+                            <a
+                                class="dropdown-item logout-item"
+                                href="/auth/logout"
+                            >
+
+                                <i class="bi bi-box-arrow-right"></i>
+
+                                Logout
+
+                            </a>
+
+                        </li>
+
+                    </ul>
+
+                </div>
+
+
+            <% } else { %>
+
+
+                <!-- LOGIN -->
+
+                <a
+                    href="/auth/login"
+                    class="drinkit-login"
+                >
+
+                    <i class="bi bi-person"></i>
+
+                    <span>Login</span>
+
+                </a>
+
+
+            <% } %>
+
+
+            <!-- ==============================================
+                 CART
+            =============================================== -->
+
+            <a
+                href="/cart"
+                class="drinkit-cart"
+            >
+
+                <span class="cart-icon">
+
+                    <i class="bi bi-bag-fill"></i>
+
+                </span>
+
+
+                <span class="cart-label">
+                    My Cart
+                </span>
+
+
+                <span class="cart-count">
+                    0
+                </span>
+
+            </a>
+
+
+        </div>
+
+    </div>
+
+</nav>

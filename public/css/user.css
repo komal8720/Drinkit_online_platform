@@ -1,0 +1,500 @@
+/* ==========================================================
+   DRINKIT USER GLOBAL CSS
+========================================================== */
+
+:root {
+    --drinkit-primary: #641f35;
+    --drinkit-primary-dark: #481425;
+    --drinkit-light: #f8eef1;
+    --drinkit-text: #292326;
+    --drinkit-muted: #777174;
+    --drinkit-border: #e9e4e5;
+    --drinkit-white: #ffffff;
+}
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+body {
+    font-family:
+        "Inter",
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    color: var(--drinkit-text);
+
+    background: #ffffff;
+
+    line-height: 1.6;
+}
+
+
+a {
+    text-decoration: none;
+}
+
+
+button,
+a {
+    -webkit-tap-highlight-color: transparent;
+}
+
+
+/* ==========================================================
+   FOOTER
+========================================================== */
+
+.drinkit-footer {
+    background: #1c1518;
+    color: #ffffff;
+}
+
+
+/* Newsletter */
+
+.footer-newsletter {
+    padding: 55px 0;
+    background: #24191d;
+}
+
+
+.newsletter-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 30px;
+
+    padding: 35px 40px;
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    border-radius: 18px;
+
+    background: rgba(255,255,255,0.025);
+}
+
+
+.newsletter-label {
+    color: #c99aa8;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 2px;
+}
+
+
+.newsletter-content h3 {
+    margin: 7px 0 5px;
+
+    font-size: 25px;
+    font-weight: 700;
+}
+
+
+.newsletter-content p {
+    margin: 0;
+
+    color: #aaa1a5;
+
+    font-size: 14px;
+}
+
+
+.newsletter-form {
+    display: flex;
+
+    width: 480px;
+
+    max-width: 100%;
+
+    gap: 8px;
+}
+
+
+.newsletter-input {
+    flex: 1;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    background: #ffffff;
+
+    border-radius: 9px;
+
+    padding: 0 15px;
+}
+
+
+.newsletter-input i {
+    color: var(--drinkit-primary);
+}
+
+
+.newsletter-input input {
+    width: 100%;
+
+    border: 0;
+    outline: 0;
+
+    padding: 13px 0;
+
+    font-size: 13px;
+}
+
+
+.newsletter-form button {
+    border: 0;
+
+    border-radius: 9px;
+
+    padding: 0 20px;
+
+    background: var(--drinkit-primary);
+
+    color: #ffffff;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    transition: 0.3s ease;
+}
+
+
+.newsletter-form button:hover {
+    background: #7a2943;
+}
+
+
+/* Main Footer */
+
+.footer-main {
+    padding: 70px 0 50px;
+}
+
+
+.footer-brand {
+    padding-right: 30px;
+}
+
+
+.footer-logo {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    color: #ffffff;
+
+    font-size: 29px;
+    font-weight: 800;
+
+    margin-bottom: 18px;
+}
+
+
+.footer-logo span:last-child {
+    color: #c98fa1;
+}
+
+
+.footer-logo-icon {
+    width: 43px;
+    height: 43px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background: var(--drinkit-primary);
+
+    color: #ffffff;
+
+    font-size: 20px;
+}
+
+
+.footer-brand p {
+    color: #aaa1a5;
+
+    font-size: 14px;
+
+    line-height: 1.8;
+
+    max-width: 350px;
+}
+
+
+/* Social */
+
+.footer-social {
+    display: flex;
+
+    gap: 9px;
+
+    margin-top: 22px;
+}
+
+
+.footer-social a {
+    width: 37px;
+    height: 37px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    color: #ffffff;
+
+    background: #2c2327;
+
+    transition: 0.3s ease;
+}
+
+
+.footer-social a:hover {
+    background: var(--drinkit-primary);
+
+    transform: translateY(-3px);
+}
+
+
+/* Footer Titles */
+
+.footer-title {
+    position: relative;
+
+    margin-bottom: 22px;
+
+    color: #ffffff;
+
+    font-size: 15px;
+
+    font-weight: 700;
+}
+
+
+.footer-title::after {
+    content: "";
+
+    display: block;
+
+    width: 28px;
+    height: 2px;
+
+    margin-top: 9px;
+
+    background: var(--drinkit-primary);
+}
+
+
+/* Footer Links */
+
+.footer-links {
+    list-style: none;
+
+    padding: 0;
+    margin: 0;
+}
+
+
+.footer-links li {
+    margin-bottom: 11px;
+}
+
+
+.footer-links a {
+    color: #aaa1a5;
+
+    font-size: 13px;
+
+    transition: 0.25s ease;
+}
+
+
+.footer-links a:hover {
+    color: #ffffff;
+
+    padding-left: 4px;
+}
+
+
+/* Contact */
+
+.footer-contact {
+    list-style: none;
+
+    padding: 0;
+    margin: 0;
+}
+
+
+.footer-contact li {
+    display: flex;
+
+    gap: 11px;
+
+    margin-bottom: 17px;
+}
+
+
+.footer-contact li > i {
+    color: #c98fa1;
+
+    font-size: 16px;
+
+    margin-top: 3px;
+}
+
+
+.footer-contact span {
+    display: block;
+
+    color: #81777b;
+
+    font-size: 11px;
+}
+
+
+.footer-contact strong {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #d5ced1;
+
+    font-size: 12px;
+
+    font-weight: 500;
+}
+
+
+/* Bottom */
+
+.footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.07);
+
+    padding: 20px 0;
+}
+
+
+.footer-bottom-content {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+
+.footer-bottom p {
+    margin: 0;
+
+    color: #81777b;
+
+    font-size: 12px;
+}
+
+
+.footer-bottom-links {
+    display: flex;
+
+    gap: 22px;
+}
+
+
+.footer-bottom-links a {
+    color: #81777b;
+
+    font-size: 12px;
+
+    transition: 0.2s ease;
+}
+
+
+.footer-bottom-links a:hover {
+    color: #ffffff;
+}
+
+
+/* ==========================================================
+   RESPONSIVE FOOTER
+========================================================== */
+
+@media (max-width: 991px) {
+
+    .newsletter-box {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        padding: 30px;
+    }
+
+    .newsletter-form {
+        width: 100%;
+    }
+
+}
+
+
+@media (max-width: 767px) {
+
+    .footer-main {
+        padding: 50px 0 30px;
+    }
+
+    .footer-brand {
+        padding-right: 0;
+    }
+
+    .newsletter-form {
+        flex-direction: column;
+    }
+
+    .newsletter-input {
+        width: 100%;
+    }
+
+    .newsletter-form button {
+        padding: 13px;
+    }
+
+    .footer-bottom-content {
+        flex-direction: column;
+
+        text-align: center;
+    }
+
+    .footer-bottom-links {
+        flex-wrap: wrap;
+
+        justify-content: center;
+
+        gap: 12px;
+    }
+
+}

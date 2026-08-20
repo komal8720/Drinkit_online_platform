@@ -1,0 +1,1035 @@
+/* ==========================================================
+   DRINKIT — PROFESSIONAL NAVBAR
+========================================================== */
+
+
+/* ==========================================================
+   ROOT VARIABLES
+========================================================== */
+
+:root {
+
+    --drinkit-wine: #731b32;
+
+    --drinkit-wine-dark: #4f1021;
+
+    --drinkit-wine-light: #f8eef1;
+
+    --drinkit-gold: #c9a45c;
+
+    --drinkit-text: #211b1d;
+
+    --drinkit-muted: #707070;
+
+    --drinkit-border: #e8e4e5;
+
+    --drinkit-search: #f7f7f7;
+
+}
+
+
+/* ==========================================================
+   MAIN NAVBAR
+========================================================== */
+
+.drinkit-main-navbar {
+
+    width: 100%;
+
+    height: 82px;
+
+    background: #ffffff;
+
+    border-bottom: 1px solid var(--drinkit-border);
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 1050;
+
+    box-shadow:
+        0 3px 18px rgba(0, 0, 0, 0.045);
+
+}
+
+
+/* ==========================================================
+   NAVBAR INNER
+========================================================== */
+
+.drinkit-navbar-inner {
+
+    width: 100%;
+
+    max-width: 1500px;
+
+    height: 100%;
+
+    margin: 0 auto;
+
+    padding: 0 32px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 30px;
+
+}
+
+
+/* ==========================================================
+   LOGO
+========================================================== */
+
+.drinkit-logo {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    min-width: 190px;
+
+    text-decoration: none;
+
+    color: var(--drinkit-wine);
+
+}
+
+
+.drinkit-logo:hover {
+
+    color: var(--drinkit-wine-dark);
+
+}
+
+
+.logo-icon {
+
+    width: 43px;
+
+    height: 43px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--drinkit-wine),
+            var(--drinkit-wine-dark)
+        );
+
+    color: #ffffff;
+
+    font-size: 20px;
+
+    box-shadow:
+        0 6px 16px rgba(115, 27, 50, 0.22);
+
+}
+
+
+.logo-text {
+
+    font-size: 29px;
+
+    font-weight: 800;
+
+    letter-spacing: -1.2px;
+
+}
+
+
+.logo-text span {
+
+    color: var(--drinkit-gold);
+
+}
+
+
+/* ==========================================================
+   DELIVERY INFORMATION
+========================================================== */
+
+.delivery-info {
+
+    min-width: 205px;
+
+}
+
+
+.delivery-title {
+
+    color: var(--drinkit-text);
+
+    font-size: 14px;
+
+    line-height: 1.3;
+
+    font-weight: 500;
+
+}
+
+
+.delivery-title strong {
+
+    font-weight: 800;
+
+    color: var(--drinkit-text);
+
+}
+
+
+.delivery-location {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-top: 4px;
+
+    color: var(--drinkit-muted);
+
+    font-size: 13px;
+
+    white-space: nowrap;
+
+}
+
+
+.delivery-location > i:first-child {
+
+    color: var(--drinkit-wine);
+
+    font-size: 14px;
+
+}
+
+
+.location-arrow {
+
+    font-size: 9px;
+
+    margin-left: 2px;
+
+}
+
+
+/* ==========================================================
+   SEARCH
+========================================================== */
+
+.drinkit-search {
+
+    flex: 1;
+
+    max-width: 600px;
+
+    height: 50px;
+
+    display: flex;
+
+    align-items: center;
+
+    background: var(--drinkit-search);
+
+    border: 1px solid transparent;
+
+    border-radius: 13px;
+
+    padding-left: 16px;
+
+    overflow: hidden;
+
+    transition:
+        border 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease;
+
+}
+
+
+.drinkit-search:focus-within {
+
+    background: #ffffff;
+
+    border-color:
+        rgba(115, 27, 50, 0.35);
+
+    box-shadow:
+        0 0 0 4px
+        rgba(115, 27, 50, 0.07);
+
+}
+
+
+.search-icon {
+
+    color: #777;
+
+    font-size: 18px;
+
+    margin-right: 11px;
+
+}
+
+
+.drinkit-search input {
+
+    flex: 1;
+
+    width: 100%;
+
+    height: 100%;
+
+    border: none;
+
+    outline: none;
+
+    background: transparent;
+
+    color: var(--drinkit-text);
+
+    font-size: 14px;
+
+}
+
+
+.drinkit-search input::placeholder {
+
+    color: #929292;
+
+}
+
+
+/* ==========================================================
+   SEARCH BUTTON
+========================================================== */
+
+.search-button {
+
+    height: 38px;
+
+    margin-right: 6px;
+
+    padding: 0 17px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: var(--drinkit-wine);
+
+    color: #ffffff;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.25s ease;
+
+}
+
+
+.search-button:hover {
+
+    background:
+        var(--drinkit-wine-dark);
+
+}
+
+
+/* ==========================================================
+   RIGHT ACTIONS
+========================================================== */
+
+.drinkit-actions {
+
+    margin-left: auto;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+}
+
+
+/* ==========================================================
+   LANGUAGE
+========================================================== */
+
+.drinkit-language {
+
+    position: relative;
+
+}
+
+
+.language-btn {
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 0 12px;
+
+    border: 1px solid var(--drinkit-border);
+
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    color: var(--drinkit-text);
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    transition: 0.25s ease;
+
+}
+
+
+.language-btn:hover {
+
+    color: var(--drinkit-wine);
+
+    border-color: var(--drinkit-wine);
+
+    background: var(--drinkit-wine-light);
+
+}
+
+
+.language-btn i {
+
+    font-size: 17px;
+
+}
+
+
+.language-btn::after {
+
+    font-size: 9px;
+
+    margin-left: 1px;
+
+}
+
+
+/* ==========================================================
+   LANGUAGE DROPDOWN
+========================================================== */
+
+.language-dropdown {
+
+    min-width: 185px;
+
+    padding: 7px;
+
+    margin-top: 10px !important;
+
+    border: 1px solid #eeeeee;
+
+    border-radius: 13px;
+
+    box-shadow:
+        0 15px 40px
+        rgba(0, 0, 0, 0.12);
+
+}
+
+
+.language-dropdown .dropdown-item {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 10px 12px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+    color: var(--drinkit-text);
+
+}
+
+
+.language-dropdown .dropdown-item:hover {
+
+    background: var(--drinkit-wine-light);
+
+    color: var(--drinkit-wine);
+
+}
+
+
+.language-dropdown .dropdown-item.active {
+
+    background: var(--drinkit-wine-light);
+
+    color: var(--drinkit-wine);
+
+    font-weight: 700;
+
+}
+
+
+.language-dropdown small {
+
+    color: #999;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+}
+
+
+/* ==========================================================
+   LOGIN
+========================================================== */
+
+.drinkit-login {
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 0 11px;
+
+    text-decoration: none;
+
+    color: var(--drinkit-text);
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    border-radius: 9px;
+
+    transition: 0.25s ease;
+
+}
+
+
+.drinkit-login i {
+
+    font-size: 18px;
+
+}
+
+
+.drinkit-login:hover {
+
+    color: var(--drinkit-wine);
+
+    background: var(--drinkit-wine-light);
+
+}
+
+
+/* ==========================================================
+   CART
+========================================================== */
+
+.drinkit-cart {
+
+    height: 48px;
+
+    min-width: 138px;
+
+    padding: 0 12px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    text-decoration: none;
+
+    color: #ffffff;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--drinkit-wine),
+            var(--drinkit-wine-dark)
+        );
+
+    border-radius: 11px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    box-shadow:
+        0 6px 17px
+        rgba(115, 27, 50, 0.18);
+
+    transition: all 0.25s ease;
+
+}
+
+
+.drinkit-cart:hover {
+
+    color: #ffffff;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 9px 22px
+        rgba(115, 27, 50, 0.25);
+
+}
+
+
+.cart-icon {
+
+    font-size: 17px;
+
+}
+
+
+.cart-count {
+
+    min-width: 22px;
+
+    height: 22px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #ffffff;
+
+    color: var(--drinkit-wine);
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+}
+
+
+/* ==========================================================
+   USER PROFILE
+========================================================== */
+
+.user-profile-btn {
+
+    height: 45px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 0 9px;
+
+    border: none;
+
+    background: transparent;
+
+    color: var(--drinkit-text);
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    border-radius: 10px;
+
+}
+
+
+.user-profile-btn:hover {
+
+    background: var(--drinkit-wine-light);
+
+    color: var(--drinkit-wine);
+
+}
+
+
+.user-profile-btn::after {
+
+    font-size: 9px;
+
+}
+
+
+.user-avatar {
+
+    width: 34px;
+
+    height: 34px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: var(--drinkit-wine-light);
+
+    color: var(--drinkit-wine);
+
+}
+
+
+/* ==========================================================
+   USER DROPDOWN
+========================================================== */
+
+.drinkit-user-dropdown {
+
+    min-width: 240px;
+
+    padding: 8px;
+
+    margin-top: 9px !important;
+
+    border: 1px solid #eeeeee;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 15px 45px
+        rgba(0, 0, 0, 0.13);
+
+}
+
+
+.dropdown-user-info {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 10px;
+
+}
+
+
+.dropdown-user-avatar {
+
+    width: 40px;
+
+    height: 40px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: var(--drinkit-wine-light);
+
+    color: var(--drinkit-wine);
+
+}
+
+
+.dropdown-user-info strong {
+
+    display: block;
+
+    color: var(--drinkit-text);
+
+    font-size: 13px;
+
+}
+
+
+.dropdown-user-info small {
+
+    display: block;
+
+    margin-top: 2px;
+
+    color: #888;
+
+    font-size: 11px;
+
+}
+
+
+.drinkit-user-dropdown .dropdown-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 10px 11px;
+
+    border-radius: 8px;
+
+    color: var(--drinkit-text);
+
+    font-size: 13px;
+
+}
+
+
+.drinkit-user-dropdown .dropdown-item i {
+
+    width: 18px;
+
+    color: var(--drinkit-wine);
+
+}
+
+
+.drinkit-user-dropdown .dropdown-item:hover {
+
+    background: var(--drinkit-wine-light);
+
+    color: var(--drinkit-wine);
+
+}
+
+
+.logout-item {
+
+    color: #b3261e !important;
+
+}
+
+
+.logout-item i {
+
+    color: #b3261e !important;
+
+}
+
+
+/* ==========================================================
+   RESPONSIVE — TABLET
+========================================================== */
+
+@media (max-width: 1200px) {
+
+    .drinkit-navbar-inner {
+
+        padding: 0 20px;
+
+        gap: 18px;
+
+    }
+
+
+    .drinkit-logo {
+
+        min-width: auto;
+
+    }
+
+
+    .delivery-info {
+
+        min-width: 180px;
+
+    }
+
+
+    .drinkit-search {
+
+        max-width: 480px;
+
+    }
+
+}
+
+
+/* ==========================================================
+   RESPONSIVE — SMALL LAPTOP / TABLET
+========================================================== */
+
+@media (max-width: 992px) {
+
+    .drinkit-main-navbar {
+
+        height: auto;
+
+    }
+
+
+    .drinkit-navbar-inner {
+
+        min-height: 82px;
+
+        flex-wrap: wrap;
+
+        padding: 13px 20px;
+
+    }
+
+
+    .delivery-info {
+
+        display: none;
+
+    }
+
+
+    .drinkit-search {
+
+        order: 5;
+
+        flex-basis: 100%;
+
+        max-width: 100%;
+
+        margin-bottom: 5px;
+
+    }
+
+}
+
+
+/* ==========================================================
+   RESPONSIVE — MOBILE
+========================================================== */
+
+@media (max-width: 576px) {
+
+    .drinkit-navbar-inner {
+
+        padding: 11px 14px;
+
+        gap: 9px;
+
+    }
+
+
+    .logo-icon {
+
+        width: 38px;
+
+        height: 38px;
+
+        font-size: 18px;
+
+    }
+
+
+    .logo-text {
+
+        font-size: 24px;
+
+    }
+
+
+    .drinkit-actions {
+
+        gap: 4px;
+
+    }
+
+
+    .drinkit-login span {
+
+        display: none;
+
+    }
+
+
+    .drinkit-login {
+
+        padding: 0 7px;
+
+    }
+
+
+    .language-btn {
+
+        padding: 0 8px;
+
+    }
+
+
+    .language-btn span {
+
+        display: none;
+
+    }
+
+
+    .drinkit-cart {
+
+        min-width: 45px;
+
+        width: 45px;
+
+        padding: 0;
+
+    }
+
+
+    .cart-label {
+
+        display: none;
+
+    }
+
+
+    .drinkit-search {
+
+        height: 46px;
+
+    }
+
+
+    .search-button {
+
+        padding: 0 12px;
+
+    }
+
+}
