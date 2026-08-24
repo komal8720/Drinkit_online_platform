@@ -148,6 +148,17 @@ app.use(
 
 
 // ==========================================================
+// ROUTES
+// ==========================================================
+
+const userRouter = require("./routes/userRouter");
+const authRouter = require("./routes/auth");
+
+app.use("/", userRouter);
+app.use("/auth", authRouter);
+
+
+// ==========================================================
 // USER SIDE - HOME ROUTE
 // ==========================================================
 

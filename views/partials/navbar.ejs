@@ -177,6 +177,9 @@
 
             <% if (typeof user !== 'undefined' && user) { %>
 
+                <!-- ==============================================
+                     USER PROFILE DROPDOWN
+                =============================================== -->
                 <div class="dropdown">
 
                     <button
@@ -193,9 +196,7 @@
                         </span>
 
                         <span class="user-name">
-
-                            <%= user.first_name || "Account" %>
-
+                            <%= [user.first_name, user.last_name].filter(Boolean).join(" ") || "Account" %>
                         </span>
 
                     </button>
@@ -214,9 +215,9 @@
 
                             <div>
 
-                                <strong>
-                                    <%= user.first_name || "User" %>
-                                </strong>
+                        <strong>
+                            <%= [user.first_name, user.last_name].filter(Boolean).join(" ") || "User" %>
+                        </strong>
 
                                 <small>
                                     <%= user.email || "" %>
@@ -281,22 +282,6 @@
 
 
                         <li>
-
-                            <a
-                                class="dropdown-item"
-                                href="/cart"
-                            >
-
-                                <i class="bi bi-bag"></i>
-
-                                My Cart
-
-                            </a>
-
-                        </li>
-
-
-                        <li>
                             <hr class="dropdown-divider">
                         </li>
 
@@ -320,12 +305,37 @@
 
                 </div>
 
+                <!-- ==============================================
+                     CART
+                =============================================== -->
+                <a
+                    href="/cart"
+                    class="drinkit-cart"
+                >
+
+                    <span class="cart-icon">
+
+                        <i class="bi bi-bag-fill"></i>
+
+                    </span>
+
+
+                    <span class="cart-label">
+                        My Cart
+                    </span>
+
+
+                    <span class="cart-count">
+                        0
+                    </span>
+
+                </a>
+
 
             <% } else { %>
 
 
                 <!-- LOGIN -->
-
                 <a
                     href="/auth/login"
                     class="drinkit-login"
@@ -337,36 +347,21 @@
 
                 </a>
 
+                <!-- REGISTER -->
+                <a
+                    href="/auth/register"
+                    class="drinkit-login"
+                    style="border: 1px solid var(--drinkit-border);"
+                >
+
+                    <i class="bi bi-person-plus"></i>
+
+                    <span>Register</span>
+
+                </a>
+
 
             <% } %>
-
-
-            <!-- ==============================================
-                 CART
-            =============================================== -->
-
-            <a
-                href="/cart"
-                class="drinkit-cart"
-            >
-
-                <span class="cart-icon">
-
-                    <i class="bi bi-bag-fill"></i>
-
-                </span>
-
-
-                <span class="cart-label">
-                    My Cart
-                </span>
-
-
-                <span class="cart-count">
-                    0
-                </span>
-
-            </a>
 
 
         </div>
