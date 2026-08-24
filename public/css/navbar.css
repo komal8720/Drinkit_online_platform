@@ -1035,3 +1035,43 @@
     }
 
 }
+
+
+/* ==========================================================
+   LOCATION SELECTOR MODAL CUSTOM STYLES
+========================================================== */
+
+.preset-location-btn {
+    border: 1px solid var(--drinkit-border) !important;
+    background: #ffffff !important;
+    color: var(--drinkit-text) !important;
+    text-align: left;
+    transition: all 0.2s ease-in-out;
+}
+
+.preset-location-btn:hover {
+    border-color: var(--drinkit-wine) !important;
+    background: var(--drinkit-wine-light) !important;
+    color: var(--drinkit-wine) !important;
+}
+
+#useGeolocationBtn {
+    transition: all 0.25s ease;
+}
+
+#useGeolocationBtn:hover {
+    background: var(--drinkit-wine-light) !important;
+    border-color: var(--drinkit-wine) !important;
+    color: var(--drinkit-wine) !important;
+}
+
+#saveManualLocationBtn {
+    background: var(--drinkit-wine);
+    border: 1px solid var(--drinkit-wine);
+    transition: all 0.2s ease;
+}
+
+#saveManualLocationBtn:hover {
+    background: var(--drinkit-wine-dark);
+    border-color: var(--drinkit-wine-dark);
+}

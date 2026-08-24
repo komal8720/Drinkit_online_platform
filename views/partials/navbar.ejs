@@ -26,20 +26,20 @@
 
 
         <!-- ==================================================
-             DELIVERY / LOCATION
+             DELIVERY / LOCATION (DYNAMIC MODAL TRIGGER)
         ================================================== -->
 
-        <div class="delivery-info">
+        <div class="delivery-info" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#locationModal">
 
             <div class="delivery-title">
-                Delivery in <strong>30 minutes</strong>
+                <%= __("delivery_in") %> <strong><%= __("minutes") %></strong>
             </div>
 
             <div class="delivery-location">
 
                 <i class="bi bi-geo-alt-fill"></i>
 
-                <span>Nagar, Maharashtra</span>
+                <span id="navbarLocation"><%= typeof selectedLocation !== 'undefined' ? selectedLocation : "Nagar, Maharashtra" %></span>
 
                 <i class="bi bi-chevron-down location-arrow"></i>
 
@@ -64,7 +64,8 @@
                 type="text"
                 name="search"
                 id="drinkitSearch"
-                placeholder='Search "wine", "beer", "snacks"...'
+                placeholder='<%= __("search_placeholder") %>'
+                value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
                 autocomplete="off"
             >
 
@@ -72,7 +73,7 @@
                 type="submit"
                 class="search-button"
             >
-                Search
+                <%= __("search") %>
             </button>
 
         </form>
@@ -100,7 +101,7 @@
 
                     <i class="bi bi-translate"></i>
 
-                    <span>EN</span>
+                    <span><%= typeof currentLang !== 'undefined' ? currentLang : "EN" %></span>
 
                 </button>
 
@@ -110,7 +111,7 @@
                     <li>
 
                         <a
-                            class="dropdown-item active"
+                            class="dropdown-item <%= typeof langCode !== 'undefined' && langCode === 'en' ? 'active' : '' %>"
                             href="?lang=en"
                         >
 
@@ -130,7 +131,7 @@
                     <li>
 
                         <a
-                            class="dropdown-item"
+                            class="dropdown-item <%= typeof langCode !== 'undefined' && langCode === 'mr' ? 'active' : '' %>"
                             href="?lang=mr"
                         >
 
@@ -150,7 +151,7 @@
                     <li>
 
                         <a
-                            class="dropdown-item"
+                            class="dropdown-item <%= typeof langCode !== 'undefined' && langCode === 'hi' ? 'active' : '' %>"
                             href="?lang=hi"
                         >
 
@@ -242,7 +243,7 @@
 
                                 <i class="bi bi-person"></i>
 
-                                My Profile
+                                <%= __("profile") %>
 
                             </a>
 
@@ -258,7 +259,7 @@
 
                                 <i class="bi bi-box-seam"></i>
 
-                                My Orders
+                                <%= __("orders") %>
 
                             </a>
 
@@ -274,7 +275,7 @@
 
                                 <i class="bi bi-heart"></i>
 
-                                Wishlist
+                                <%= __("wishlist") %>
 
                             </a>
 
@@ -295,7 +296,7 @@
 
                                 <i class="bi bi-box-arrow-right"></i>
 
-                                Logout
+                                <%= __("logout") %>
 
                             </a>
 
@@ -321,12 +322,12 @@
 
 
                     <span class="cart-label">
-                        My Cart
+                        <%= __("my_cart") %>
                     </span>
 
 
                     <span class="cart-count">
-                        0
+                        <%= typeof cartCount !== 'undefined' ? cartCount : 0 %>
                     </span>
 
                 </a>
@@ -343,7 +344,7 @@
 
                     <i class="bi bi-person"></i>
 
-                    <span>Login</span>
+                    <span><%= __("login") %></span>
 
                 </a>
 
@@ -356,7 +357,7 @@
 
                     <i class="bi bi-person-plus"></i>
 
-                    <span>Register</span>
+                    <span><%= __("register") %></span>
 
                 </a>
 
@@ -369,3 +370,203 @@
     </div>
 
 </nav>
+
+
+<!-- ==========================================================
+     LOCATION SELECTOR MODAL
+========================================================== -->
+<div class="modal fade" id="locationModal" tabindex="-1" aria-labelledby="locationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--drinkit-border); padding: 20px 24px;">
+                <h5 class="modal-title" id="locationModalLabel" style="font-weight: 800; color: var(--drinkit-wine);"><%= __("select_location_title") %></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="padding: 24px;">
+                <!-- Current Location Display -->
+                <div class="mb-4">
+                    <small class="text-muted d-block mb-1" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Current Selected Location</small>
+                    <div class="d-flex align-items-center gap-2 p-3" style="background: var(--drinkit-wine-light); border-radius: 12px; border: 1px solid rgba(115, 27, 50, 0.1);">
+                        <i class="bi bi-geo-alt-fill" style="color: var(--drinkit-wine); font-size: 18px;"></i>
+                        <strong style="color: var(--drinkit-wine-dark);" id="currentLocationDisplay"><%= typeof selectedLocation !== 'undefined' ? selectedLocation : "Nagar, Maharashtra" %></strong>
+                    </div>
+                </div>
+
+                <!-- Geolocation Button -->
+                <button type="button" class="btn w-100 mb-4 d-flex align-items-center justify-content-center gap-2" id="useGeolocationBtn" style="height: 48px; border-radius: 12px; font-weight: 700; border: 1px solid var(--drinkit-wine); color: var(--drinkit-wine); background: #ffffff; transition: 0.2s;">
+                    <i class="bi bi-crosshair"></i>
+                    <span><%= __("use_current_location") %></span>
+                </button>
+
+                <!-- Popular Locations Grid -->
+                <div class="mb-4">
+                    <small class="text-muted d-block mb-2" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Popular Cities</small>
+                    <div class="row g-2">
+                        <% ["Nagar, Maharashtra", "Pune, Maharashtra", "Mumbai, Maharashtra", "Thane, Maharashtra", "Nashik, Maharashtra", "Aurangabad, Maharashtra"].forEach(loc => { %>
+                            <div class="col-6">
+                                <button type="button" class="btn w-100 preset-location-btn text-start text-truncate" data-location="<%= loc %>" style="padding: 10px 12px; font-size: 13px; font-weight: 600; border: 1px solid var(--drinkit-border); border-radius: 10px; background: #ffffff; color: var(--drinkit-text); transition: 0.2s;">
+                                    📍 <%= loc.split(",")[0] %>
+                                </button>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+
+                <!-- Manual Input -->
+                <div>
+                    <small class="text-muted d-block mb-2" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;"><%= __("enter_location_placeholder") %></small>
+                    <div class="d-flex gap-2">
+                        <input type="text" id="manualLocationInput" class="form-control" placeholder="Type city or area..." style="height: 44px; border-radius: 10px; font-size: 14px; border-color: var(--drinkit-border);">
+                        <button type="button" id="saveManualLocationBtn" class="btn" style="background: var(--drinkit-wine); color: #ffffff; font-weight: 700; border-radius: 10px; padding: 0 20px;"><%= __("save") %></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ==========================================================
+     NAVBAR SCRIPTING
+========================================================== -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // ----------------------------------------------------
+    // Location selector logic
+    // ----------------------------------------------------
+    const locationModal = document.getElementById("locationModal");
+    const navbarLocation = document.getElementById("navbarLocation");
+    const currentLocationDisplay = document.getElementById("currentLocationDisplay");
+    const useGeolocationBtn = document.getElementById("useGeolocationBtn");
+    const manualLocationInput = document.getElementById("manualLocationInput");
+    const saveManualLocationBtn = document.getElementById("saveManualLocationBtn");
+    const presetButtons = document.querySelectorAll(".preset-location-btn");
+
+    function updateLocationOnServer(locName) {
+        fetch("/set-location", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ location: locName })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Update elements in navbar and modal
+                if (navbarLocation) navbarLocation.textContent = data.location;
+                if (currentLocationDisplay) currentLocationDisplay.textContent = data.location;
+                
+                // Hide modal
+                const modalInstance = bootstrap.Modal.getInstance(locationModal);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+                
+                // Reload page to reflect updated location
+                window.location.reload();
+            }
+        })
+        .catch(err => console.error("Error setting location:", err));
+    }
+
+    // Handle preset locations
+    presetButtons.forEach(btn => {
+        btn.addEventListener("click", function () {
+            const loc = this.getAttribute("data-location");
+            updateLocationOnServer(loc);
+        });
+    });
+
+    // Handle manual input
+    if (saveManualLocationBtn) {
+        saveManualLocationBtn.addEventListener("click", function () {
+            const val = manualLocationInput.value.trim();
+            if (val) {
+                updateLocationOnServer(val);
+            }
+        });
+    }
+
+    // Handle manual input Enter press
+    if (manualLocationInput) {
+        manualLocationInput.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                const val = manualLocationInput.value.trim();
+                if (val) {
+                    updateLocationOnServer(val);
+                }
+            }
+        });
+    }
+
+    // Handle Geolocation API
+    if (useGeolocationBtn) {
+        useGeolocationBtn.addEventListener("click", function () {
+            useGeolocationBtn.disabled = true;
+            useGeolocationBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Locating...';
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+
+                        // Call Nominatim API for reverse geocoding
+                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`)
+                            .then(res => res.json())
+                            .then(data => {
+                                let addressName = "Nagar, Maharashtra";
+                                if (data && data.address) {
+                                    const city = data.address.city || data.address.town || data.address.village || data.address.suburb || data.address.county || "";
+                                    const state = data.address.state || "";
+                                    if (city && state) {
+                                        addressName = `${city}, ${state}`;
+                                    } else if (city) {
+                                        addressName = city;
+                                    } else if (state) {
+                                        addressName = state;
+                                    }
+                                }
+                                updateLocationOnServer(addressName);
+                            })
+                            .catch(err => {
+                                console.error("Geocoding failed:", err);
+                                // Fallback if lookup fails
+                                updateLocationOnServer("Nagar, Maharashtra");
+                            })
+                            .finally(() => {
+                                useGeolocationBtn.disabled = false;
+                                useGeolocationBtn.innerHTML = '<i class="bi bi-crosshair"></i> Use my current location';
+                            });
+                    },
+                    function (error) {
+                        console.error("Geolocation error:", error);
+                        alert("Could not retrieve geolocation. Please select a city manually.");
+                        useGeolocationBtn.disabled = false;
+                        useGeolocationBtn.innerHTML = '<i class="bi bi-crosshair"></i> Use my current location';
+                    }
+                );
+            } else {
+                alert("Geolocation is not supported by your browser.");
+                useGeolocationBtn.disabled = false;
+                useGeolocationBtn.innerHTML = '<i class="bi bi-crosshair"></i> Use my current location';
+            }
+        });
+    }
+    
+    // ----------------------------------------------------
+    // Language dropdown URL parameter preservation
+    // ----------------------------------------------------
+    document.querySelectorAll('.language-dropdown a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const urlParams = new URLSearchParams(window.location.search);
+            const hrefLang = this.getAttribute('href');
+            const targetLang = hrefLang.split('lang=')[1];
+            urlParams.set('lang', targetLang);
+            window.location.search = urlParams.toString();
+        });
+    });
+});
+</script>

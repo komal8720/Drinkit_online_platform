@@ -13,7 +13,15 @@ const helmet = require("helmet");
 const cors = require("cors");
 const morgan = require("morgan");
 
-const { testConnection } = require("./config/db");
+const fs = require("fs");
+const { pool, testConnection } = require("./config/db");
+
+// Load translation files
+const locales = {
+    en: JSON.parse(fs.readFileSync(path.join(__dirname, "locales/en.json"), "utf8")),
+    mr: JSON.parse(fs.readFileSync(path.join(__dirname, "locales/mr.json"), "utf8")),
+    hi: JSON.parse(fs.readFileSync(path.join(__dirname, "locales/hi.json"), "utf8"))
+};
 
 const app = express();
 
@@ -71,6 +79,17 @@ app.use(
 
 
 // ==========================================================
+// STATIC FILES
+// ==========================================================
+
+app.use(
+    express.static(
+        path.join(__dirname, "public")
+    )
+);
+
+
+// ==========================================================
 // SESSION
 // ==========================================================
 
@@ -107,7 +126,7 @@ app.use(flash());
 // GLOBAL VARIABLES FOR EJS
 // ==========================================================
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
 
     res.locals.success = req.flash("success");
 
@@ -118,6 +137,47 @@ app.use((req, res, next) => {
 
     res.locals.appName =
         process.env.APP_NAME || "Drinkit";
+
+    // Set selected location
+    res.locals.selectedLocation = req.session.location || "Nagar, Maharashtra";
+
+    // Set current language and translation helper
+    let lang = req.query.lang || req.session.lang || "en";
+    if (!locales[lang]) {
+        lang = "en";
+    }
+    req.session.lang = lang;
+    res.locals.currentLang = lang.toUpperCase();
+    res.locals.langCode = lang;
+    res.locals.__ = (key) => {
+        return locales[lang][key] || locales["en"][key] || key;
+    };
+
+    // Fetch dynamic cart count for logged-in user
+    let cartCount = 0;
+    if (req.session.user) {
+        try {
+            const [cartRows] = await pool.query(
+                `SELECT SUM(ci.quantity) as count 
+                 FROM carts c 
+                 JOIN cart_items ci ON c.id = ci.cart_id 
+                 WHERE c.user_id = ?`,
+                [req.session.user.id]
+            );
+            cartCount = cartRows[0].count || 0;
+        } catch (err) {
+            try {
+                const [flatCartRows] = await pool.query(
+                    `SELECT SUM(quantity) as count FROM cart WHERE user_id = ?`,
+                    [req.session.user.id]
+                );
+                cartCount = flatCartRows[0].count || 0;
+            } catch (flatErr) {
+                console.error("Error fetching cart count:", flatErr);
+            }
+        }
+    }
+    res.locals.cartCount = Number(cartCount);
 
     next();
 
@@ -136,15 +196,7 @@ app.set(
 );
 
 
-// ==========================================================
-// STATIC FILES
-// ==========================================================
 
-app.use(
-    express.static(
-        path.join(__dirname, "public")
-    )
-);
 
 
 // ==========================================================

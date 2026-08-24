@@ -1,0 +1,21 @@
+{
+  "delivery_in": "Delivery in",
+  "minutes": "30 minutes",
+  "search_placeholder": "Search \"wine\", \"beer\", \"snacks\"...",
+  "search": "Search",
+  "my_cart": "My Cart",
+  "login": "Login",
+  "register": "Register",
+  "profile": "My Profile",
+  "orders": "My Orders",
+  "wishlist": "Wishlist",
+  "logout": "Logout",
+  "select_location_title": "Select Delivery Location",
+  "use_current_location": "Use my current location",
+  "enter_location_placeholder": "Enter location manually...",
+  "cancel": "Cancel",
+  "save": "Save",
+  "no_products_found": "No products found",
+  "search_results_for": "Search results for",
+  "clear_filters": "Clear Filters"
+}

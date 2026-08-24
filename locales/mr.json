@@ -1,0 +1,21 @@
+{
+  "delivery_in": "डिलिव्हरी",
+  "minutes": "३० मिनिटांत",
+  "search_placeholder": "\"wine\", \"beer\", \"snacks\" शोधा...",
+  "search": "शोधा",
+  "my_cart": "माझी कार्ट",
+  "login": "लॉगिन",
+  "register": "नोंदणी करा",
+  "profile": "माझे प्रोफाइल",
+  "orders": "माझ्या ऑर्डर्स",
+  "wishlist": "इच्छासूची",
+  "logout": "लॉगआऊट",
+  "select_location_title": "डिलिव्हरीचे ठिकाण निवडा",
+  "use_current_location": "माझे सध्याचे स्थान वापरा",
+  "enter_location_placeholder": "ठिकाण मॅन्युअली प्रविष्ट करा...",
+  "cancel": "रद्द करा",
+  "save": "जतन करा",
+  "no_products_found": "कोणतीही उत्पादने आढळली नाहीत",
+  "search_results_for": "यासाठीचे शोध परिणाम",
+  "clear_filters": "फिल्टर्स काढा"
+}
