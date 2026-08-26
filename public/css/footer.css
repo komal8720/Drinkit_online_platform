@@ -1,0 +1,682 @@
+/* ==========================================================
+   DRINKIT — PROFESSIONAL FOOTER
+========================================================== */
+
+.drinkit-footer {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: #171114;
+    color: #ffffff;
+    overflow: hidden;
+}
+
+
+/* ==========================================================
+   NEWSLETTER SECTION
+========================================================== */
+
+.footer-newsletter {
+    width: 100%;
+    padding: 52px 0;
+    background: #21181c;
+}
+
+.footer-newsletter .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+.newsletter-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 45px;
+
+    padding: 42px 50px;
+
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 22px;
+
+    background: rgba(255, 255, 255, 0.025);
+
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.12);
+}
+
+
+/* Newsletter Text */
+
+.newsletter-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.newsletter-label {
+    display: inline-block;
+
+    margin-bottom: 10px;
+
+    color: #d19aaa;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 2px;
+}
+
+.newsletter-content h3 {
+    margin: 0 0 8px;
+
+    color: #ffffff;
+
+    font-size: 28px;
+    font-weight: 800;
+
+    line-height: 1.25;
+}
+
+.newsletter-content p {
+    margin: 0;
+
+    color: #a99da1;
+
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+
+/* Newsletter Form */
+
+.newsletter-form {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    flex: 1;
+
+    max-width: 620px;
+}
+
+.newsletter-input {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    flex: 1;
+
+    height: 58px;
+
+    background: #ffffff;
+
+    border-radius: 13px;
+
+    overflow: hidden;
+}
+
+.newsletter-input i {
+    margin-left: 18px;
+
+    color: var(--drinkit-primary);
+
+    font-size: 18px;
+}
+
+.newsletter-input input {
+    width: 100%;
+    height: 100%;
+
+    padding: 0 18px 0 12px;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    color: #2b2528;
+
+    font-size: 14px;
+}
+
+.newsletter-input input::placeholder {
+    color: #8b8588;
+}
+
+.newsletter-form button {
+    height: 58px;
+
+    padding: 0 27px;
+
+    border: none;
+    border-radius: 13px;
+
+    background: var(--drinkit-primary);
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        background 0.25s ease;
+}
+
+.newsletter-form button:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 10px 25px rgba(115, 27, 50, 0.30);
+
+    background: var(--drinkit-wine-dark, #60162b);
+}
+
+.newsletter-form button i {
+    margin-left: 7px;
+}
+
+
+/* ==========================================================
+   MAIN FOOTER
+========================================================== */
+
+.footer-main {
+    width: 100%;
+
+    padding: 65px 0 55px;
+
+    background: #171114;
+}
+
+.footer-main .container {
+    width: 100%;
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+
+/* Bootstrap Row Fix */
+
+.footer-main .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+
+/* ==========================================================
+   BRAND
+========================================================== */
+
+.footer-brand {
+    padding-right: 35px;
+}
+
+.footer-logo {
+    display: inline-flex;
+
+    align-items: center;
+    gap: 11px;
+
+    margin-bottom: 20px;
+
+    color: #ffffff;
+
+    font-size: 29px;
+    font-weight: 800;
+
+    text-decoration: none;
+
+    transition: opacity 0.25s ease;
+}
+
+.footer-logo:hover {
+    color: #ffffff;
+    opacity: 0.9;
+}
+
+.footer-logo span:last-child {
+    color: #c98fa1;
+}
+
+.footer-logo-icon {
+    width: 44px;
+    height: 44px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: var(--drinkit-primary);
+
+    color: #ffffff;
+
+    font-size: 20px;
+
+    box-shadow:
+        0 8px 20px rgba(115, 27, 50, 0.25);
+}
+
+.footer-brand p {
+    max-width: 360px;
+
+    margin: 0;
+
+    color: #a99da1;
+
+    font-size: 14px;
+
+    line-height: 1.85;
+}
+
+
+/* ==========================================================
+   SOCIAL ICONS
+========================================================== */
+
+.footer-social {
+    display: flex;
+
+    gap: 9px;
+
+    margin-top: 25px;
+}
+
+.footer-social a {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    border-radius: 50%;
+
+    background: #251c20;
+
+    color: #cfc5c9;
+
+    font-size: 14px;
+
+    text-decoration: none;
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        color 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.footer-social a:hover {
+    transform: translateY(-3px);
+
+    background: var(--drinkit-primary);
+
+    border-color: var(--drinkit-primary);
+
+    color: #ffffff;
+}
+
+
+/* ==========================================================
+   FOOTER TITLES
+========================================================== */
+
+.footer-title {
+    position: relative;
+
+    margin: 0 0 24px;
+
+    color: #ffffff;
+
+    font-size: 15px;
+
+    font-weight: 800;
+
+    line-height: 1.3;
+}
+
+.footer-title::after {
+    content: "";
+
+    display: block;
+
+    width: 30px;
+    height: 2px;
+
+    margin-top: 10px;
+
+    border-radius: 10px;
+
+    background: var(--drinkit-primary);
+}
+
+
+/* ==========================================================
+   FOOTER LINKS
+========================================================== */
+
+.footer-links {
+    list-style: none;
+
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 13px;
+}
+
+.footer-links a {
+    display: inline-block;
+
+    color: #a99da1;
+
+    font-size: 13px;
+
+    text-decoration: none;
+
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.footer-links a:hover {
+    color: #ffffff;
+
+    transform: translateX(4px);
+}
+
+
+/* ==========================================================
+   CONTACT
+========================================================== */
+
+.footer-contact {
+    list-style: none;
+
+    padding: 0;
+    margin: 0;
+}
+
+.footer-contact li {
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 12px;
+
+    margin-bottom: 19px;
+}
+
+.footer-contact li > i {
+    flex-shrink: 0;
+
+    margin-top: 3px;
+
+    color: #c98fa1;
+
+    font-size: 16px;
+}
+
+.footer-contact span {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #81777b;
+
+    font-size: 11px;
+
+    font-weight: 500;
+}
+
+.footer-contact strong {
+    display: block;
+
+    color: #d5ced1;
+
+    font-size: 12px;
+
+    font-weight: 500;
+
+    line-height: 1.5;
+}
+
+
+/* ==========================================================
+   BOTTOM FOOTER
+========================================================== */
+
+.footer-bottom {
+    width: 100%;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+
+    padding: 21px 0;
+
+    background: #120e10;
+}
+
+.footer-bottom .container {
+    width: 100%;
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+.footer-bottom-content {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+.footer-bottom p {
+    margin: 0;
+
+    color: #777075;
+
+    font-size: 11px;
+}
+
+.footer-bottom-links {
+    display: flex;
+
+    align-items: center;
+
+    gap: 24px;
+}
+
+.footer-bottom-links a {
+    color: #777075;
+
+    font-size: 11px;
+
+    text-decoration: none;
+
+    transition: color 0.2s ease;
+}
+
+.footer-bottom-links a:hover {
+    color: #ffffff;
+}
+
+
+/* ==========================================================
+   FULL WIDTH SAFETY
+========================================================== */
+
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    overflow-x: hidden;
+}
+
+.drinkit-footer,
+.footer-newsletter,
+.footer-main,
+.footer-bottom {
+    box-sizing: border-box;
+}
+
+
+/* ==========================================================
+   LARGE TABLET
+========================================================== */
+
+@media (max-width: 991px) {
+
+    .newsletter-box {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 25px;
+
+        padding: 35px;
+    }
+
+    .newsletter-form {
+        width: 100%;
+        max-width: none;
+    }
+
+    .footer-brand {
+        padding-right: 0;
+    }
+
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width: 767px) {
+
+    .footer-newsletter {
+        padding: 35px 0;
+    }
+
+    .newsletter-box {
+        padding: 28px 22px;
+
+        border-radius: 18px;
+    }
+
+    .newsletter-content h3 {
+        font-size: 23px;
+    }
+
+    .newsletter-content p {
+        font-size: 13px;
+    }
+
+    .newsletter-form {
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 10px;
+    }
+
+    .newsletter-input {
+        width: 100%;
+    }
+
+    .newsletter-form button {
+        width: 100%;
+    }
+
+    .footer-main {
+        padding: 48px 0 30px;
+    }
+
+    .footer-brand {
+        padding-right: 0;
+    }
+
+    .footer-title {
+        margin-top: 10px;
+    }
+
+    .footer-bottom-content {
+        flex-direction: column;
+
+        justify-content: center;
+
+        text-align: center;
+    }
+
+    .footer-bottom-links {
+        flex-wrap: wrap;
+
+        justify-content: center;
+
+        gap: 10px 18px;
+    }
+
+}
+
+
+/* ==========================================================
+   SMALL MOBILE
+========================================================== */
+
+@media (max-width: 480px) {
+
+    .footer-newsletter .container,
+    .footer-main .container,
+    .footer-bottom .container {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .newsletter-box {
+        padding: 24px 18px;
+    }
+
+    .newsletter-content h3 {
+        font-size: 21px;
+    }
+
+    .footer-logo {
+        font-size: 26px;
+    }
+
+    .footer-logo-icon {
+        width: 41px;
+        height: 41px;
+    }
+
+}

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="<%= langCode %>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Home CSS (for grid, product card styles) -->
+    <link rel="stylesheet" href="/css/user/home.css">
+    <style>
+        .product-details-container {
+            padding-top: 40px;
+            padding-bottom: 80px;
+            min-height: 80vh;
+        }
+        .breadcrumb-item a {
+            font-weight: 600;
+            color: var(--drinkit-muted) !important;
+        }
+        .breadcrumb-item.active {
+            font-weight: 700;
+            color: var(--drinkit-text) !important;
+        }
+        .product-main-card {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid var(--drinkit-border);
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+            margin-bottom: 40px;
+        }
+        .details-image-wrapper {
+            border: 1px solid var(--drinkit-border);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            background: #fafafa;
+            position: relative;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .details-image-wrapper img {
+            max-height: 380px;
+            max-width: 100%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+        .details-image-wrapper img:hover {
+            transform: scale(1.05);
+        }
+        .details-category-badge {
+            display: inline-block;
+            background: var(--drinkit-wine-light);
+            color: var(--drinkit-wine);
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            padding: 6px 14px;
+            border-radius: 50px;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+        }
+        .details-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--drinkit-text);
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+        .details-brand {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--drinkit-muted);
+            margin-bottom: 20px;
+        }
+        .details-size {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--drinkit-text);
+            background: #f1f1f1;
+            padding: 6px 14px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-bottom: 25px;
+        }
+        .details-price-wrapper {
+            border-top: 1px solid var(--drinkit-border);
+            border-bottom: 1px solid var(--drinkit-border);
+            padding: 20px 0;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .details-price {
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--drinkit-wine);
+        }
+        .details-sale-price {
+            font-size: 20px;
+            color: var(--drinkit-muted);
+            text-decoration: line-through;
+        }
+        .details-discount-badge {
+            background: #28a745;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+        .details-action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .details-add-btn {
+            background: var(--drinkit-wine);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 16px;
+            padding: 12px 36px;
+            border: none;
+            border-radius: 12px;
+            transition: 0.2s ease;
+            flex-grow: 1;
+            max-width: 250px;
+        }
+        .details-add-btn:hover {
+            background: var(--drinkit-wine-dark);
+        }
+        .details-wishlist-btn {
+            background: #ffffff;
+            border: 1px solid var(--drinkit-border);
+            border-radius: 12px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--drinkit-muted);
+            transition: 0.2s ease;
+        }
+        .details-wishlist-btn:hover, .details-wishlist-btn.active {
+            color: var(--drinkit-wine);
+            border-color: var(--drinkit-wine);
+            background: var(--drinkit-wine-light);
+        }
+        .spec-table th {
+            width: 30%;
+            font-weight: 700;
+            color: var(--drinkit-muted);
+            border-bottom: 1px solid #f1f1f1;
+            padding: 12px 0;
+        }
+        .spec-table td {
+            color: var(--drinkit-text);
+            font-weight: 600;
+            border-bottom: 1px solid #f1f1f1;
+            padding: 12px 0;
+        }
+        .related-title h3 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--drinkit-text);
+            margin-bottom: 25px;
+        }
+        .related-title h3 span {
+            color: var(--drinkit-wine);
+        }
+    </style>
+</head>
+<body>
+
+<%- include('../partials/navbar') %>
+
+<div class="container product-details-container">
+    
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb" style="background: transparent; padding: 0;">
+            <li class="breadcrumb-item">
+                <a href="/" class="text-decoration-none">
+                    <i class="bi bi-house-door-fill me-1"></i>Home
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="/products" class="text-decoration-none">Shop</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="/products?category=<%= product.category_slug %>" class="text-decoration-none">
+                    <%= product.category_name %>
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <%= product.name %>
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Main Product Section -->
+    <div class="product-main-card">
+        <div class="row g-5">
+            <!-- Left: Product Image -->
+            <div class="col-md-6">
+                <div class="details-image-wrapper">
+                    <img 
+                        src="<%= product.image || '/images/beer.jpg' %>" 
+                        alt="<%= product.name %>" 
+                        onerror="this.onerror=null;this.src='/images/beer.jpg';"
+                    >
+                </div>
+            </div>
+            
+            <!-- Right: Product Info & Actions -->
+            <div class="col-md-6">
+                <span class="details-category-badge">
+                    <%= product.category_name %>
+                </span>
+                
+                <h1 class="details-title">
+                    <%= product.name %>
+                </h1>
+                
+                <% if (product.brand_name) { %>
+                    <div class="details-brand">
+                        Brand: <span class="text-dark font-weight-bold"><%= product.brand_name %></span>
+                    </div>
+                <% } %>
+                
+                <% if (product.bottle_size) { %>
+                    <div class="details-size">
+                        <i class="bi bi-tag-fill me-1"></i>Volume: <%= product.bottle_size %>
+                    </div>
+                <% } %>
+                
+                <div class="details-price-wrapper">
+                    <div class="details-price">
+                        ₹<%= parseInt(product.price) %>
+                    </div>
+                    <% if (product.sale_price) { %>
+                        <div class="details-sale-price">
+                            ₹<%= parseInt(product.sale_price) %>
+                        </div>
+                        <% const pct = Math.round(((product.sale_price - product.price) / product.sale_price) * 100); %>
+                        <% if (pct > 0) { %>
+                            <span class="details-discount-badge"><%= pct %>% OFF</span>
+                        <% } %>
+                    <% } %>
+                </div>
+
+                <div class="details-action-buttons">
+                    <button class="details-add-btn add-cart-btn" data-product-id="<%= product.id %>">
+                        <i class="bi bi-plus-lg me-2"></i>Add to Cart
+                    </button>
+                    <button class="details-wishlist-btn">
+                        <i class="bi bi-heart"></i>
+                    </button>
+                </div>
+
+                <!-- Stock availability -->
+                <div class="mb-4">
+                    <% if (product.stock_quantity > 0) { %>
+                        <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i> In Stock</span>
+                    <% } else { %>
+                        <span class="text-danger"><i class="bi bi-x-circle-fill me-1"></i> Temporarily Out of Stock</span>
+                    <% } %>
+                </div>
+
+                <!-- Product Specifications -->
+                <div class="mt-4 pt-4 border-top">
+                    <h4 class="h6 text-uppercase fw-bold text-muted mb-3">Product Specifications</h4>
+                    <table class="table spec-table">
+                        <tbody>
+                            <tr>
+                                <th>Category</th>
+                                <td><%= product.category_name %></td>
+                            </tr>
+                            <% if (product.brand_name) { %>
+                                <tr>
+                                    <th>Brand</th>
+                                    <td><%= product.brand_name %></td>
+                                </tr>
+                            <% } %>
+                            <% if (product.alcohol_percentage !== null) { %>
+                                <tr>
+                                    <th>Alcohol Vol %</th>
+                                    <td><%= product.alcohol_percentage %>% v/v</td>
+                                </tr>
+                            <% } %>
+                            <tr>
+                                <th>SKU</th>
+                                <td><%= product.sku || 'N/A' %></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Description -->
+        <div class="row mt-5 pt-4 border-top">
+            <div class="col-12">
+                <h4 class="h5 fw-bold text-dark mb-3">Product Description</h4>
+                <p class="text-muted leading-relaxed" style="font-size: 15px; font-weight: 500;">
+                    <%= product.description || "No product description available." %>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    <% if (relatedProducts && relatedProducts.length > 0) { %>
+        <div class="mt-5 pt-4 border-top">
+            <div class="related-title">
+                <h3>Related <span><%= product.category_name %>s</span></h3>
+            </div>
+            
+            <div class="product-grid revealed">
+                <% relatedProducts.forEach(prod => { %>
+                    <div class="product-card revealed">
+                        <div class="product-image">
+                            <% if (prod.is_featured) { %>
+                                <span class="product-badge">Popular</span>
+                            <% } %>
+                            <button class="wishlist-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                            <a href="/product/<%= prod.slug %>">
+                                <img src="<%= prod.image || '/images/beer.jpg' %>" alt="<%= prod.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
+                            </a>
+                        </div>
+                        <div class="product-info">
+                            <span class="product-category"><%= prod.category_name || product.category_name %></span>
+                            <h3>
+                                <a href="/product/<%= prod.slug %>" class="text-decoration-none text-dark">
+                                    <%= prod.name %>
+                                </a>
+                            </h3>
+                            <% if (prod.bottle_size) { %>
+                                <small class="text-muted d-block mb-2"><%= prod.bottle_size %></small>
+                            <% } %>
+                            <div class="product-bottom">
+                                <div>
+                                    <strong class="product-price">₹<%= parseInt(prod.price) %></strong>
+                                    <% if (prod.sale_price) { %>
+                                        <del>₹<%= parseInt(prod.sale_price) %></del>
+                                    <% } %>
+                                </div>
+                                <button class="add-cart-btn" data-product-id="<%= prod.id %>">
+                                    <i class="bi bi-plus-lg"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+    <% } %>
+
+</div>
+
+<%- include('../partials/footer') %>
+
+<!-- Bootstrap Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Wishlist Toggle
+    $(".wishlist-btn, .details-wishlist-btn").on("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        let icon;
+        if ($(this).hasClass("details-wishlist-btn")) {
+            icon = $(this).find("i");
+            $(this).toggleClass("active");
+            icon.toggleClass("bi-heart");
+            icon.toggleClass("bi-heart-fill");
+        } else {
+            icon = $(this).find("i");
+            icon.toggleClass("bi-heart");
+            icon.toggleClass("bi-heart-fill");
+            $(this).toggleClass("active");
+        }
+    });
+
+    // AJAX Add to Cart Handler
+    $(".add-cart-btn").on("click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const btn = $(this);
+        const productId = btn.data("product-id");
+        
+        if (!productId) return;
+        
+        btn.prop("disabled", true);
+        
+        fetch("/cart/add", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ productId: productId, quantity: 1 })
+        })
+        .then(res => {
+            if (res.status === 401) {
+                alert("Please login to add items to your cart.");
+                window.location.href = "/auth/login";
+                throw new Error("Unauthorized");
+            }
+            if (!res.ok) {
+                throw new Error("Server error");
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Update cart count in navbar
+                const badge = $(".cart-count");
+                if (badge.length) {
+                    badge.text(data.cartCount);
+                    badge.show();
+                }
+                alert("Product added to cart successfully!");
+            } else {
+                alert(data.message || "Failed to add product to cart.");
+            }
+        })
+        .catch(err => {
+            if (err.message !== "Unauthorized") {
+                console.error("Error adding to cart:", err);
+                alert("Something went wrong. Please try again.");
+            }
+        })
+        .finally(() => {
+            btn.prop("disabled", false);
+        });
+    });
+});
+</script>
+</body>
+</html>

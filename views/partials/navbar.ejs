@@ -57,6 +57,12 @@
             method="GET"
             class="drinkit-search"
         >
+            <% if (typeof categoryFilter !== 'undefined' && categoryFilter) { %>
+                <input type="hidden" name="category" value="<%= categoryFilter %>">
+            <% } %>
+            <% if (typeof brandFilter !== 'undefined' && brandFilter) { %>
+                <input type="hidden" name="brand" value="<%= brandFilter %>">
+            <% } %>
 
             <i class="bi bi-search search-icon"></i>
 

@@ -60,9 +60,10 @@ app.use(
 // LOGGING
 // ==========================================================
 
-if (process.env.NODE_ENV === "development") {
-    app.use(morgan("dev"));
-}
+// Morgan logging disabled to keep console output clean
+// if (process.env.NODE_ENV === "development") {
+//     app.use(morgan("dev"));
+// }
 
 
 // ==========================================================
@@ -215,15 +216,51 @@ app.use("/admin", adminRoutes);
 // USER SIDE - HOME ROUTE
 // ==========================================================
 
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
+    try {
+        const limit = 8;
+        
+        const [wine] = await pool.query(
+            "SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p JOIN categories c ON p.category_id = c.id WHERE c.slug = 'wine' AND p.status = 'approved' LIMIT ?",
+            [limit]
+        );
+        const [beer] = await pool.query(
+            "SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p JOIN categories c ON p.category_id = c.id WHERE c.slug = 'beer' AND p.status = 'approved' LIMIT ?",
+            [limit]
+        );
+        const [spirits] = await pool.query(
+            "SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p JOIN categories c ON p.category_id = c.id WHERE c.slug = 'spirits' AND p.status = 'approved' LIMIT ?",
+            [limit]
+        );
+        const [pan] = await pool.query(
+            "SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p JOIN categories c ON p.category_id = c.id WHERE c.slug = 'pan' AND p.status = 'approved' LIMIT ?",
+            [limit]
+        );
+        const [softDrinks] = await pool.query(
+            "SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p JOIN categories c ON p.category_id = c.id WHERE c.slug = 'soft-drinks' AND p.status = 'approved' LIMIT ?",
+            [limit]
+        );
+        const [snacks] = await pool.query(
+            "SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p JOIN categories c ON p.category_id = c.id WHERE c.slug = 'snacks' AND p.status = 'approved' LIMIT ?",
+            [limit]
+        );
 
-    res.render("user/home", {
-
-        title:
-            "Drinkit - Beverage Delivery Platform"
-
-    });
-
+        res.render("user/home", {
+            title: "Drinkit - Beverage Delivery Platform",
+            wine,
+            beer,
+            spirits,
+            pan,
+            softDrinks,
+            snacks
+        });
+    } catch (err) {
+        console.error("❌ Error loading home collections:", err);
+        res.render("user/home", {
+            title: "Drinkit - Beverage Delivery Platform",
+            wine: [], beer: [], spirits: [], pan: [], softDrinks: [], snacks: []
+        });
+    }
 });
 
 
