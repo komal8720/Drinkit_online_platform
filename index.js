@@ -205,9 +205,10 @@ app.set(
 
 const userRouter = require("./routes/userRouter");
 const authRouter = require("./routes/auth");
-
+const adminRoutes = require("./routes/admin");
 app.use("/", userRouter);
 app.use("/auth", authRouter);
+app.use("/admin", adminRoutes);
 
 
 // ==========================================================
