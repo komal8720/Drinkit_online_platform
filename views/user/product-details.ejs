@@ -316,51 +316,242 @@
         </div>
     </div>
 
-    <!-- Related Products -->
+    <!-- Related Products Section -->
     <% if (relatedProducts && relatedProducts.length > 0) { %>
         <div class="mt-5 pt-4 border-top">
-            <div class="related-title">
-                <h3>Related <span><%= product.category_name %>s</span></h3>
+            <div class="related-title mb-4">
+                <h3>Related <span>
+                    <% if (product.category_slug === 'smoke') { %>
+                        Smoke
+                    <% } else if (product.category_slug === 'snacks') { %>
+                        Snacks
+                    <% } else if (product.category_slug === 'soft-drinks') { %>
+                        Soft Drinks
+                    <% } else if (product.category_slug === 'spirits') { %>
+                        Spirits
+                    <% } else { %>
+                        <%= product.category_name.toLowerCase().endsWith('s') ? product.category_name : product.category_name + 's' %>
+                    <% } %>
+                </span></h3>
             </div>
             
-            <div class="product-grid revealed">
-                <% relatedProducts.forEach(prod => { %>
-                    <div class="product-card revealed">
-                        <div class="product-image">
-                            <% if (prod.is_featured) { %>
-                                <span class="product-badge">Popular</span>
-                            <% } %>
-                            <button class="wishlist-btn">
-                                <i class="bi bi-heart"></i>
-                            </button>
-                            <a href="/product/<%= prod.slug %>">
-                                <img src="<%= prod.image || '/images/beer.jpg' %>" alt="<%= prod.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
-                            </a>
-                        </div>
-                        <div class="product-info">
-                            <span class="product-category"><%= prod.category_name || product.category_name %></span>
-                            <h3>
-                                <a href="/product/<%= prod.slug %>" class="text-decoration-none text-dark">
-                                    <%= prod.name %>
-                                </a>
-                            </h3>
-                            <% if (prod.bottle_size) { %>
-                                <small class="text-muted d-block mb-2"><%= prod.bottle_size %></small>
-                            <% } %>
-                            <div class="product-bottom">
-                                <div>
-                                    <strong class="product-price">₹<%= parseInt(prod.price) %></strong>
-                                    <% if (prod.sale_price) { %>
-                                        <del>₹<%= parseInt(prod.sale_price) %></del>
-                                    <% } %>
-                                </div>
-                                <button class="add-cart-btn" data-product-id="<%= prod.id %>">
-                                    <i class="bi bi-plus-lg"></i> Add
+            <div class="category-slider-wrap position-relative">
+                <button type="button" class="category-slider-arrow category-slider-prev" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+
+                <div class="category-products-slider" id="relatedProductsSlider">
+                    <% relatedProducts.forEach(prod => { %>
+                        <div class="category-product-card">
+                            <div class="category-product-image">
+                                <% if (prod.is_featured) { %>
+                                    <span class="category-product-badge">Popular</span>
+                                <% } %>
+                                <button class="category-wishlist wishlist-btn">
+                                    <i class="bi bi-heart"></i>
                                 </button>
+                                <a href="/product/<%= prod.slug %>">
+                                    <img src="<%= prod.image || '/images/beer.jpg' %>" alt="<%= prod.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
+                                </a>
+                            </div>
+                            <div class="category-product-info">
+                                <span class="category-product-category"><%= prod.category_name || product.category_name %></span>
+                                <h3>
+                                    <a href="/product/<%= prod.slug %>" class="text-decoration-none text-dark">
+                                        <%= prod.name %>
+                                    </a>
+                                </h3>
+                                <% if (prod.bottle_size) { %>
+                                    <span class="category-product-size"><%= prod.bottle_size %></span>
+                                <% } %>
+                                <div class="category-product-bottom">
+                                    <strong>₹<%= parseInt(prod.price) %></strong>
+                                    <% if (prod.sale_price) { %>
+                                        <del class="text-muted ms-2" style="font-size: 13px;"><small>₹<%= parseInt(prod.sale_price) %></small></del>
+                                    <% } %>
+                                    <button class="category-add-btn add-cart-btn" data-product-id="<%= prod.id %>">
+                                        ADD
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                <% }) %>
+                    <% }) %>
+                </div>
+
+                <button type="button" class="category-slider-arrow category-slider-next" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Snacks Category Carousel (Shown if current product is NOT a Snack) -->
+    <% if (product.category_slug !== 'snacks' && typeof snacks !== 'undefined' && snacks && snacks.length > 0) { %>
+        <div class="mt-5 pt-4 border-top">
+            <div class="related-title mb-4">
+                <h3>Delicious <span>Snacks</span></h3>
+            </div>
+            
+            <div class="category-slider-wrap position-relative">
+                <button type="button" class="category-slider-arrow category-slider-prev" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+
+                <div class="category-products-slider" id="detailSnacksSlider">
+                    <% snacks.forEach(snack => { %>
+                        <div class="category-product-card">
+                            <div class="category-product-image">
+                                <% if (snack.is_featured) { %>
+                                    <span class="category-product-badge">Popular</span>
+                                <% } %>
+                                <button class="category-wishlist wishlist-btn">
+                                    <i class="bi bi-heart"></i>
+                                </button>
+                                <a href="/product/<%= snack.slug %>">
+                                    <img src="<%= snack.image || '/images/beer.jpg' %>" alt="<%= snack.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
+                                </a>
+                            </div>
+                            <div class="category-product-info">
+                                <span class="category-product-category"><%= snack.category_name || 'Snacks' %></span>
+                                <h3>
+                                    <a href="/product/<%= snack.slug %>" class="text-decoration-none text-dark">
+                                        <%= snack.name %>
+                                    </a>
+                                </h3>
+                                <% if (snack.bottle_size) { %>
+                                    <span class="category-product-size"><%= snack.bottle_size %></span>
+                                <% } %>
+                                <div class="category-product-bottom">
+                                    <strong>₹<%= parseInt(snack.price) %></strong>
+                                    <% if (snack.sale_price) { %>
+                                        <del class="text-muted ms-2" style="font-size: 13px;"><small>₹<%= parseInt(snack.sale_price) %></small></del>
+                                    <% } %>
+                                    <button class="category-add-btn add-cart-btn" data-product-id="<%= snack.id %>">
+                                        ADD
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <button type="button" class="category-slider-arrow category-slider-next" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Soft Drinks Category Carousel (Shown if current product is NOT a Soft Drink) -->
+    <% if (product.category_slug !== 'soft-drinks' && typeof softDrinks !== 'undefined' && softDrinks && softDrinks.length > 0) { %>
+        <div class="mt-5 pt-4 border-top">
+            <div class="related-title mb-4">
+                <h3>Soft <span>Drinks</span></h3>
+            </div>
+            
+            <div class="category-slider-wrap position-relative">
+                <button type="button" class="category-slider-arrow category-slider-prev" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+
+                <div class="category-products-slider" id="detailSoftDrinksSlider">
+                    <% softDrinks.forEach(drink => { %>
+                        <div class="category-product-card">
+                            <div class="category-product-image">
+                                <% if (drink.is_featured) { %>
+                                    <span class="category-product-badge">Popular</span>
+                                <% } %>
+                                <button class="category-wishlist wishlist-btn">
+                                    <i class="bi bi-heart"></i>
+                                </button>
+                                <a href="/product/<%= drink.slug %>">
+                                    <img src="<%= drink.image || '/images/beer.jpg' %>" alt="<%= drink.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
+                                </a>
+                            </div>
+                            <div class="category-product-info">
+                                <span class="category-product-category"><%= drink.category_name || 'Soft Drinks' %></span>
+                                <h3>
+                                    <a href="/product/<%= drink.slug %>" class="text-decoration-none text-dark">
+                                        <%= drink.name %>
+                                    </a>
+                                </h3>
+                                <% if (drink.bottle_size) { %>
+                                    <span class="category-product-size"><%= drink.bottle_size %></span>
+                                <% } %>
+                                <div class="category-product-bottom">
+                                    <strong>₹<%= parseInt(drink.price) %></strong>
+                                    <% if (drink.sale_price) { %>
+                                        <del class="text-muted ms-2" style="font-size: 13px;"><small>₹<%= parseInt(drink.sale_price) %></small></del>
+                                    <% } %>
+                                    <button class="category-add-btn add-cart-btn" data-product-id="<%= drink.id %>">
+                                        ADD
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <button type="button" class="category-slider-arrow category-slider-next" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Spirits Category Carousel (Shown if current product is NOT a Spirit) -->
+    <% if (product.category_slug !== 'spirits' && typeof spirits !== 'undefined' && spirits && spirits.length > 0) { %>
+        <div class="mt-5 pt-4 border-top">
+            <div class="related-title mb-4">
+                <h3>Premium <span>Spirits</span></h3>
+            </div>
+            
+            <div class="category-slider-wrap position-relative">
+                <button type="button" class="category-slider-arrow category-slider-prev" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+
+                <div class="category-products-slider" id="detailSpiritsSlider">
+                    <% spirits.forEach(spirit => { %>
+                        <div class="category-product-card">
+                            <div class="category-product-image">
+                                <% if (spirit.is_featured) { %>
+                                    <span class="category-product-badge">Popular</span>
+                                <% } %>
+                                <button class="category-wishlist wishlist-btn">
+                                    <i class="bi bi-heart"></i>
+                                </button>
+                                <a href="/product/<%= spirit.slug %>">
+                                    <img src="<%= spirit.image || '/images/beer.jpg' %>" alt="<%= spirit.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
+                                </a>
+                            </div>
+                            <div class="category-product-info">
+                                <span class="category-product-category"><%= spirit.category_name || 'Spirits' %></span>
+                                <h3>
+                                    <a href="/product/<%= spirit.slug %>" class="text-decoration-none text-dark">
+                                        <%= spirit.name %>
+                                    </a>
+                                </h3>
+                                <% if (spirit.bottle_size) { %>
+                                    <span class="category-product-size"><%= spirit.bottle_size %></span>
+                                <% } %>
+                                <div class="category-product-bottom">
+                                    <strong>₹<%= parseInt(spirit.price) %></strong>
+                                    <% if (spirit.sale_price) { %>
+                                        <del class="text-muted ms-2" style="font-size: 13px;"><small>₹<%= parseInt(spirit.sale_price) %></small></del>
+                                    <% } %>
+                                    <button class="category-add-btn add-cart-btn" data-product-id="<%= spirit.id %>">
+                                        ADD
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <button type="button" class="category-slider-arrow category-slider-next" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
         </div>
     <% } %>
@@ -376,6 +567,20 @@
 
 <script>
 $(document).ready(function() {
+    // Generic horizontal slider scroll for all sliders
+    $(document).on("click", ".category-slider-arrow", function() {
+        const arrow = $(this);
+        const slider = arrow.siblings(".category-products-slider");
+        if (slider.length) {
+            const scrollAmount = 450;
+            const direction = arrow.hasClass("category-slider-prev") ? -1 : 1;
+            slider[0].scrollBy({
+                left: direction * scrollAmount,
+                behavior: "smooth"
+            });
+        }
+    });
+
     // Wishlist Toggle
     $(".wishlist-btn, .details-wishlist-btn").on("click", function (event) {
         event.preventDefault();

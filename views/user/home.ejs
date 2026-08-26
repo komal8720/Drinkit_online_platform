@@ -651,314 +651,52 @@
 
 
         <div class="product-grid">
-
-
-            <!-- PRODUCT 1 -->
-
-            <div class="product-card">
-
-                <div class="product-image">
-
-                    <span class="product-badge">
-                        Popular
-                    </span>
-
-                    <button class="wishlist-btn">
-
-                        <i class="bi bi-heart"></i>
-
-                    </button>
-
-                    <img
-                        src="/images/red-wine.jpg"
-                        alt="Premium Wine"
-                    >
-
-                </div>
-
-
-                <div class="product-info">
-
-                    <span class="product-category">
-                        Wine
-                    </span>
-
-                    <h3>
-                        Premium Red Wine
-                    </h3>
-
-                    <div class="rating">
-
-                        <i class="bi bi-star-fill"></i>
-
-                        <strong>4.8</strong>
-
-                        <span>
-                            (124)
-                        </span>
-
-                    </div>
-
-
-                    <div class="product-bottom">
-
-                        <div>
-
-                            <strong class="product-price">
-                                ₹899
-                            </strong>
-
-                            <del>
-                                ₹1,099
-                            </del>
-
+            <% if (typeof popularProducts !== 'undefined' && popularProducts && popularProducts.length > 0) { %>
+                <% popularProducts.forEach(product => { %>
+                    <div class="product-card revealed">
+                        <div class="product-image">
+                            <% if (product.is_featured) { %>
+                                <span class="product-badge">Popular</span>
+                            <% } else if (product.sale_price && product.sale_price > product.price) { %>
+                                <% const pct = Math.round(((product.sale_price - product.price) / product.sale_price) * 100); %>
+                                <span class="product-badge offer"><%= pct %>% OFF</span>
+                            <% } %>
+                            <button class="wishlist-btn category-wishlist">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                            <a href="/product/<%= product.slug %>">
+                                <img src="<%= product.image || '/images/beer.jpg' %>" alt="<%= product.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
+                            </a>
                         </div>
-
-
-                        <button class="add-cart-btn">
-
-                            <i class="bi bi-plus-lg"></i>
-
-                            Add
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- PRODUCT 2 -->
-
-            <div class="product-card">
-
-                <div class="product-image">
-
-                    <span class="product-badge offer">
-                        15% OFF
-                    </span>
-
-                    <button class="wishlist-btn">
-
-                        <i class="bi bi-heart"></i>
-
-                    </button>
-
-                    <img
-                        src="/images/beer-1.jpg"
-                        alt="Premium Beer"
-                    >
-
-                </div>
-
-
-                <div class="product-info">
-
-                    <span class="product-category">
-                        Beer
-                    </span>
-
-                    <h3>
-                        Premium Lager Beer
-                    </h3>
-
-                    <div class="rating">
-
-                        <i class="bi bi-star-fill"></i>
-
-                        <strong>4.7</strong>
-
-                        <span>
-                            (89)
-                        </span>
-
-                    </div>
-
-
-                    <div class="product-bottom">
-
-                        <div>
-
-                            <strong class="product-price">
-                                ₹299
-                            </strong>
-
-                            <del>
-                                ₹349
-                            </del>
-
+                        <div class="product-info">
+                            <span class="product-category"><%= product.category_name || 'Beverage' %></span>
+                            <h3>
+                                <a href="/product/<%= product.slug %>" class="text-decoration-none text-dark">
+                                    <%= product.name %>
+                                </a>
+                            </h3>
+                            <div class="rating">
+                                <i class="bi bi-star-fill"></i>
+                                <strong>4.8</strong>
+                                <span>(124)</span>
+                            </div>
+                            <div class="product-bottom">
+                                <div>
+                                    <strong class="product-price">₹<%= parseInt(product.price) %></strong>
+                                    <% if (product.sale_price) { %>
+                                        <del>₹<%= parseInt(product.sale_price) %></del>
+                                    <% } %>
+                                </div>
+                                <button class="add-cart-btn category-add-btn" data-product-id="<%= product.id %>">
+                                    <i class="bi bi-plus-lg"></i> Add
+                                </button>
+                            </div>
                         </div>
-
-
-                        <button class="add-cart-btn">
-
-                            <i class="bi bi-plus-lg"></i>
-
-                            Add
-
-                        </button>
-
                     </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- PRODUCT 3 -->
-
-            <div class="product-card">
-                  
-
-                <div class="product-image">
-
-    <span class="product-badge">
-        Popular
-    </span>
-
-    <button class="wishlist-btn">
-        <i class="bi bi-heart"></i>
-    </button>
-
-    <img
-        src="/images/snack1.jpg"
-        alt="Premium Wine"
-    >
-
-</div>
-
-
-                <div class="product-info">
-
-                    <span class="product-category">
-                        Snacks
-                    </span>
-
-                    <h3>
-                        Premium Crunchy Mix
-                    </h3>
-
-                    <div class="rating">
-
-                        <i class="bi bi-star-fill"></i>
-
-                        <strong>4.9</strong>
-
-                        <span>
-                            (210)
-                        </span>
-
-                    </div>
-
-
-                    <div class="product-bottom">
-
-                        <div>
-
-                            <strong class="product-price">
-                                ₹199
-                            </strong>
-
-                            <del>
-                                ₹249
-                            </del>
-
-                        </div>
-
-
-                        <button class="add-cart-btn">
-
-                            <i class="bi bi-plus-lg"></i>
-
-                            Add
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- PRODUCT 4 -->
-
-            <div class="product-card">
-
-              <div class="product-image">
-
-    <span class="product-badge">
-        Popular
-    </span>
-
-    <button class="wishlist-btn">
-        <i class="bi bi-heart"></i>
-    </button>
-
-    <img
-        src="/images/soft-drink-2.png"
-        alt="Premium Wine"
-    >
-
-</div>
-
-
-                <div class="product-info">
-
-                    <span class="product-category">
-                        Soft Drinks
-                    </span>
-
-                    <h3>
-                        Sparkling Refreshment
-                    </h3>
-
-                    <div class="rating">
-
-                        <i class="bi bi-star-fill"></i>
-
-                        <strong>4.6</strong>
-
-                        <span>
-                            (76)
-                        </span>
-
-                    </div>
-
-
-                    <div class="product-bottom">
-
-                        <div>
-
-                            <strong class="product-price">
-                                ₹149
-                            </strong>
-
-                            <del>
-                                ₹179
-                            </del>
-
-                        </div>
-
-
-                        <button class="add-cart-btn">
-
-                            <i class="bi bi-plus-lg"></i>
-
-                            Add
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
+                <% }) %>
+            <% } else { %>
+                <p class="text-muted text-center w-100">No popular products found.</p>
+            <% } %>
         </div>
 
     </div>
@@ -1612,6 +1350,20 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
 $(document).ready(function() {
+    // Generic horizontal slider scroll for all sliders
+    $(document).on("click", ".category-slider-arrow", function() {
+        const arrow = $(this);
+        const slider = arrow.siblings(".category-products-slider");
+        if (slider.length) {
+            const scrollAmount = 450;
+            const direction = arrow.hasClass("category-slider-prev") ? -1 : 1;
+            slider[0].scrollBy({
+                left: direction * scrollAmount,
+                behavior: "smooth"
+            });
+        }
+    });
+
     // AJAX Add to Cart Handler for Home Page
     $(document).on("click", ".category-add-btn", function(e) {
         e.preventDefault();

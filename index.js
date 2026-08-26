@@ -218,7 +218,7 @@ app.use("/admin", adminRoutes);
 
 app.get("/", async (req, res) => {
     try {
-        const limit = 8;
+        const limit = 12;
         
         const [wine] = await pool.query(
             "SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p JOIN categories c ON p.category_id = c.id WHERE c.slug = 'wine' AND p.status = 'approved' LIMIT ?",
@@ -245,6 +245,15 @@ app.get("/", async (req, res) => {
             [limit]
         );
 
+        const [popularProducts] = await pool.query(
+            `SELECT p.*, c.name as category_name, c.slug as category_slug 
+             FROM products p 
+             LEFT JOIN categories c ON p.category_id = c.id 
+             WHERE p.status = 'approved' 
+             ORDER BY p.is_featured DESC, p.created_at DESC 
+             LIMIT 4`
+        );
+
         res.render("user/home", {
             title: "Drinkit - Beverage Delivery Platform",
             wine,
@@ -252,13 +261,14 @@ app.get("/", async (req, res) => {
             spirits,
             pan,
             softDrinks,
-            snacks
+            snacks,
+            popularProducts
         });
     } catch (err) {
         console.error("❌ Error loading home collections:", err);
         res.render("user/home", {
             title: "Drinkit - Beverage Delivery Platform",
-            wine: [], beer: [], spirits: [], pan: [], softDrinks: [], snacks: []
+            wine: [], beer: [], spirits: [], pan: [], softDrinks: [], snacks: [], popularProducts: []
         });
     }
 });
@@ -312,7 +322,7 @@ app.use(
             "❌ Application Error:"
         );
 
-        console.error(err);
+        console.error(err);             
 
 
         res.status(500).render(

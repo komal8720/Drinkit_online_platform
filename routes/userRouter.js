@@ -105,7 +105,7 @@ router.get("/products", async (req, res, next) => {
             const [productRows] = await pool.query(query, queryParams);
             products = productRows;
 
-            // Fetch active brands that have products in this category
+            // Fetch active brands that have products in this category (or any approved products if no category filter is set)
             if (categoryFilter.trim()) {
                 const [brandRows] = await pool.query(
                     `SELECT DISTINCT b.id, b.name, b.slug, b.logo 
@@ -114,6 +114,14 @@ router.get("/products", async (req, res, next) => {
                      JOIN categories c ON p.category_id = c.id 
                      WHERE c.slug = ? AND b.status = 'active' AND p.status = 'approved'`,
                     [categoryFilter.trim()]
+                );
+                brands = brandRows;
+            } else {
+                const [brandRows] = await pool.query(
+                    `SELECT DISTINCT b.id, b.name, b.slug, b.logo 
+                     FROM brands b 
+                     JOIN products p ON p.brand_id = b.id 
+                     WHERE b.status = 'active' AND p.status = 'approved'`
                 );
                 brands = brandRows;
             }
@@ -280,20 +288,56 @@ router.get("/product/:slug", async (req, res, next) => {
 
         const product = products[0];
 
-        // 2. Fetch related products in the same category
+        // 2. Fetch related products in the same category (excluding current)
         const [relatedProducts] = await pool.query(
             `SELECT p.*, c.name as category_name, c.slug as category_slug 
              FROM products p 
              LEFT JOIN categories c ON p.category_id = c.id 
              WHERE p.category_id = ? AND p.id != ? AND p.status = 'approved' 
-             LIMIT 4`,
+             LIMIT 8`,
             [product.category_id, product.id]
+        );
+
+        // 3. Fetch snacks (excluding current)
+        const [snacks] = await pool.query(
+            `SELECT p.*, c.name as category_name, c.slug as category_slug 
+             FROM products p 
+             JOIN categories c ON p.category_id = c.id 
+             WHERE c.slug = 'snacks' AND p.id != ? AND p.status = 'approved' 
+             LIMIT 8`,
+            [product.id]
+        );
+
+        // 4. Fetch soft drinks (excluding current)
+        const [softDrinks] = await pool.query(
+            `SELECT p.*, c.name as category_name, c.slug as category_slug 
+             FROM products p 
+             JOIN categories c ON p.category_id = c.id 
+             WHERE c.slug = 'soft-drinks' AND p.id != ? AND p.status = 'approved' 
+             LIMIT 8`,
+            [product.id]
+        );
+
+        // 5. Fetch spirits (excluding current)
+        const [spirits] = await pool.query(
+            `SELECT p.*, c.name as category_name, c.slug as category_slug 
+             FROM products p 
+             JOIN categories c ON p.category_id = c.id 
+             WHERE c.slug = 'spirits' AND p.id != ? AND p.status = 'approved' 
+             LIMIT 8`,
+            [product.id]
         );
 
         res.render("user/product-details", {
             title: `${product.name} - Drinkit`,
             product,
-            relatedProducts
+            relatedProducts,
+            snacks,
+            snacksProducts: snacks,
+            softDrinks,
+            softDrinkProducts: softDrinks,
+            spirits,
+            spiritsProducts: spirits
         });
     } catch (error) {
         console.error("❌ Error fetching product details:", error);

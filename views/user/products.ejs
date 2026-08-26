@@ -91,6 +91,54 @@
             background: var(--drinkit-wine-light);
             color: var(--drinkit-wine);
         }
+
+        /* Brand Filter Custom Design */
+        .brand-filter-section {
+            margin-top: 10px;
+            margin-bottom: 30px;
+            padding: 15px 0;
+            border-top: 1px solid var(--drinkit-border);
+        }
+        .brand-filter-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--drinkit-muted);
+            margin-bottom: 15px;
+            display: block;
+        }
+        .brand-filter-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .brand-filter-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 700;
+            background-color: #ffffff;
+            color: var(--drinkit-text);
+            border: 1px solid var(--drinkit-border);
+            cursor: pointer;
+            transition: all 0.22s ease-in-out;
+            outline: none;
+        }
+        .brand-filter-btn.active {
+            background-color: var(--drinkit-wine);
+            color: #ffffff;
+            border-color: var(--drinkit-wine);
+        }
+        .brand-filter-btn:hover:not(.active) {
+            border-color: var(--drinkit-wine);
+            color: var(--drinkit-wine);
+            background-color: var(--drinkit-wine-light);
+            transform: scale(1.02);
+        }
     </style>
 </head>
 <body>
@@ -185,16 +233,16 @@
     <% if (!isInvalidCategory) { %>
         <!-- Brand Filters (Dynamic based on selected category) -->
         <% if (brands && brands.length > 0) { %>
-            <div class="mb-4">
-                <small class="text-muted d-block mb-2" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Filter by Brand</small>
-                <div class="d-flex gap-2 overflow-x-auto pb-2">
-                    <a href="javascript:void(0)" class="brand-filter-btn filter-pill-btn <%= !brandFilter ? 'active' : '' %>" data-brand="" style="border-radius: 20px; font-weight: 600; padding: 6px 16px; font-size: 13px;">
+            <div class="brand-filter-section">
+                <span class="brand-filter-title">Filter by Brand</span>
+                <div class="brand-filter-list">
+                    <button type="button" class="brand-filter-btn <%= !brandFilter ? 'active' : '' %>" data-brand="" aria-pressed="<%= !brandFilter ? 'true' : 'false' %>">
                         All Brands
-                    </a>
+                    </button>
                     <% brands.forEach(b => { %>
-                        <a href="javascript:void(0)" class="brand-filter-btn filter-pill-btn <%= brandFilter === b.slug ? 'active' : '' %>" data-brand="<%= b.slug %>" style="border-radius: 20px; font-weight: 600; padding: 6px 16px; font-size: 13px;">
+                        <button type="button" class="brand-filter-btn <%= brandFilter === b.slug ? 'active' : '' %>" data-brand="<%= b.slug %>" aria-pressed="<%= brandFilter === b.slug ? 'true' : 'false' %>">
                             <%= b.name %>
-                        </a>
+                        </button>
                     <% }) %>
                 </div>
             </div>
@@ -212,11 +260,17 @@
                             <button class="wishlist-btn">
                                 <i class="bi bi-heart"></i>
                             </button>
-                            <img src="<%= product.image || '/images/beer.jpg' %>" alt="<%= product.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
+                            <a href="/product/<%= product.slug %>">
+                                <img src="<%= product.image || '/images/beer.jpg' %>" alt="<%= product.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
+                            </a>
                         </div>
                         <div class="product-info">
                             <span class="product-category"><%= product.category_name || 'Beverage' %></span>
-                            <h3><%= product.name %></h3>
+                            <h3>
+                                <a href="/product/<%= product.slug %>" class="text-decoration-none text-dark">
+                                    <%= product.name %>
+                                </a>
+                            </h3>
                             <% if (product.bottle_size) { %>
                                 <small class="text-muted d-block mb-2"><%= product.bottle_size %></small>
                             <% } %>
