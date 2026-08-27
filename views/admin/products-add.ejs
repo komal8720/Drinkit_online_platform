@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom Admin CSS -->
+    <link rel="stylesheet" href="/css/admin-layout.css">
+</head>
+
+<body>
+    <!-- SIDEBAR -->
+    <%- include("partials/sidebar", { currentPage: "products" }) %>
+
+    <!-- MAIN -->
+    <main class="admin-main" id="adminMain">
+        <!-- NAVBAR -->
+        <%- include("partials/navbar") %>
+
+        <!-- CONTENT -->
+        <div class="admin-content">
+            <!-- BREADCRUMB -->
+            <div class="admin-breadcrumb">
+                <a href="/admin/dashboard">Admin</a>
+                <i class="bi bi-chevron-right"></i>
+                <a href="/admin/products">Products</a>
+                <i class="bi bi-chevron-right"></i>
+                <strong>Add Product</strong>
+            </div>
+
+            <!-- PAGE HEADER -->
+            <div class="mb-4">
+                <h1 class="fw-bold mb-1" style="font-size: 1.75rem; letter-spacing: -0.5px;">Add New Product</h1>
+                <p class="text-muted mb-0 small">Create a new product listing in your catalog</p>
+            </div>
+
+            <!-- ERROR ALERT -->
+            <% if (error) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i><%= error %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+
+            <!-- FORM -->
+            <div class="dashboard-card">
+                <div class="dashboard-card-body">
+                    <form action="/admin/products/add" method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <!-- Left Column -->
+                            <div class="col-lg-8">
+                                <div class="form-group">
+                                    <label class="form-label">Product Name *</label>
+                                    <input type="text" name="name" class="form-control" placeholder="e.g. Lay's Classic Salted" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Description</label>
+                                    <textarea name="description" class="form-control" placeholder="Describe the beverage or item..."></textarea>
+                                </div>
+
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label">Price (₹) *</label>
+                                        <input type="number" name="price" step="0.01" class="form-control" placeholder="0.00" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Sale Price (₹)</label>
+                                        <input type="number" name="sale_price" step="0.01" class="form-control" placeholder="0.00">
+                                    </div>
+                                </div>
+
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label">SKU (Stock Keeping Unit)</label>
+                                        <input type="text" name="sku" class="form-control" placeholder="e.g. WINE-RED-001 (Leave blank to auto-generate)">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Stock Quantity *</label>
+                                        <input type="number" name="stock_quantity" class="form-control" placeholder="0" value="10" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label">Bottle Size / Volume</label>
+                                        <input type="text" name="bottle_size" class="form-control" placeholder="e.g. 750ml, 330ml, 1 Can">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Alcohol Percentage (%)</label>
+                                        <input type="number" name="alcohol_percentage" step="0.01" class="form-control" placeholder="e.g. 12.5">
+                                    </div>
+                                </div>
+
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label">Min Order Qty</label>
+                                        <input type="number" name="min_order_quantity" class="form-control" value="1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Max Order Qty</label>
+                                        <input type="number" name="max_order_quantity" class="form-control" value="10">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column (Sidebar controls) -->
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label class="form-label">Associated Vendor *</label>
+                                    <select name="vendor_id" class="form-control" required>
+                                        <option value="">Select Vendor</option>
+                                        <% vendors.forEach(v => { %>
+                                            <option value="<%= v.id %>"><%= v.business_name %></option>
+                                        <% }) %>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Category *</label>
+                                    <select name="category_id" class="form-control" required>
+                                        <option value="">Select Category</option>
+                                        <% categories.forEach(cat => { %>
+                                            <option value="<%= cat.id %>"><%= cat.name %></option>
+                                        <% }) %>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Brand</label>
+                                    <select name="brand_id" class="form-control">
+                                        <option value="">Select Brand (Optional)</option>
+                                        <% brands.forEach(b => { %>
+                                            <option value="<%= b.id %>"><%= b.name %></option>
+                                        <% }) %>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Product Status</label>
+                                    <select name="status" class="form-control">
+                                        <option value="pending" selected>Pending Verification</option>
+                                        <option value="approved">Approved / Active</option>
+                                        <option value="draft">Draft</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Product Image</label>
+                                    <input type="file" name="image" class="form-control" accept="image/*">
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="isFeatured">
+                                        <label class="form-check-label fw-semibold" for="isFeatured">Feature on Home Page</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="is_age_restricted" value="1" id="isAgeRestricted" checked>
+                                        <label class="form-check-label fw-semibold" for="isAgeRestricted">Age Restricted (Alcohol/Smoke)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <a href="/admin/products" class="btn-secondary-custom">Cancel</a>
+                            <button type="submit" class="btn-primary-custom">
+                                <i class="bi bi-check-lg"></i> Create Product
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <%- include("partials/footer") %>
+    </main>
+
+    <!-- BOOTSTRAP BUNDLE JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SIDEBAR SCRIPT -->
+    <script>
+        const sidebar = document.getElementById("adminSidebar");
+        const adminMain = document.getElementById("adminMain");
+        const sidebarToggle = document.getElementById("sidebarToggle");
+
+        const isCollapsed = localStorage.getItem("adminSidebarCollapsed") === "true";
+        if (isCollapsed) {
+            sidebar.classList.add("collapsed");
+            adminMain.classList.add("expanded");
+        }
+
+        sidebarToggle?.addEventListener("click", () => {
+            const collapsed = sidebar.classList.toggle("collapsed");
+            adminMain.classList.toggle("expanded");
+            localStorage.setItem("adminSidebarCollapsed", collapsed);
+        });
+    </script>
+</body>
+
+</html>

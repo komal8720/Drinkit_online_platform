@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom Admin CSS -->
+    <link rel="stylesheet" href="/css/admin-layout.css">
+</head>
+
+<body>
+    <!-- SIDEBAR -->
+    <%- include("partials/sidebar", { currentPage: "orders" }) %>
+
+    <!-- MAIN -->
+    <main class="admin-main" id="adminMain">
+        <!-- NAVBAR -->
+        <%- include("partials/navbar") %>
+
+        <!-- CONTENT -->
+        <div class="admin-content">
+            <!-- BREADCRUMB -->
+            <div class="admin-breadcrumb">
+                <a href="/admin/dashboard">Admin</a>
+                <i class="bi bi-chevron-right"></i>
+                <strong>Orders</strong>
+            </div>
+
+            <!-- PAGE HEADER -->
+            <div class="mb-4">
+                <h1 class="fw-bold mb-1" style="font-size: 1.75rem; letter-spacing: -0.5px;">Orders</h1>
+                <p class="text-muted mb-0 small">Monitor and update customer order deliveries in real time</p>
+            </div>
+
+            <!-- STATS ROW -->
+            <div class="stats-grid mb-4">
+                <!-- Total Orders -->
+                <div class="stat-card" style="padding: 16px;">
+                    <div class="stat-card-header mb-2">
+                        <span class="stat-card-title" style="font-size: 0.75rem;">Total Orders</span>
+                        <div class="stat-card-icon orders" style="width: 32px; height: 32px; font-size: 1rem;"><i class="bi bi-bag"></i></div>
+                    </div>
+                    <div class="stat-card-value" style="font-size: 1.5rem; margin-bottom: 0;"><%= stats.total %></div>
+                </div>
+
+                <!-- Pending -->
+                <div class="stat-card" style="padding: 16px;">
+                    <div class="stat-card-header mb-2">
+                        <span class="stat-card-title" style="font-size: 0.75rem;">Pending</span>
+                        <div class="stat-card-icon" style="background-color: var(--warning-bg); color: var(--warning); width: 32px; height: 32px; font-size: 1rem;"><i class="bi bi-clock-history"></i></div>
+                    </div>
+                    <div class="stat-card-value" style="font-size: 1.5rem; margin-bottom: 0;"><%= stats.pending %></div>
+                </div>
+
+                <!-- Processing -->
+                <div class="stat-card" style="padding: 16px;">
+                    <div class="stat-card-header mb-2">
+                        <span class="stat-card-title" style="font-size: 0.75rem;">Processing</span>
+                        <div class="stat-card-icon" style="background-color: var(--info-bg); color: var(--info); width: 32px; height: 32px; font-size: 1rem;"><i class="bi bi-gear-fill"></i></div>
+                    </div>
+                    <div class="stat-card-value" style="font-size: 1.5rem; margin-bottom: 0;"><%= stats.processing %></div>
+                </div>
+
+                <!-- Delivered -->
+                <div class="stat-card" style="padding: 16px;">
+                    <div class="stat-card-header mb-2">
+                        <span class="stat-card-title" style="font-size: 0.75rem;">Delivered</span>
+                        <div class="stat-card-icon" style="background-color: var(--success-bg); color: var(--success); width: 32px; height: 32px; font-size: 1rem;"><i class="bi bi-check2-circle"></i></div>
+                    </div>
+                    <div class="stat-card-value" style="font-size: 1.5rem; margin-bottom: 0;"><%= stats.delivered %></div>
+                </div>
+
+                <!-- Cancelled -->
+                <div class="stat-card" style="padding: 16px;">
+                    <div class="stat-card-header mb-2">
+                        <span class="stat-card-title" style="font-size: 0.75rem;">Cancelled</span>
+                        <div class="stat-card-icon" style="background-color: var(--danger-bg); color: var(--danger); width: 32px; height: 32px; font-size: 1rem;"><i class="bi bi-x-circle"></i></div>
+                    </div>
+                    <div class="stat-card-value" style="font-size: 1.5rem; margin-bottom: 0;"><%= stats.cancelled %></div>
+                </div>
+            </div>
+
+            <!-- FILTERS -->
+            <div class="d-flex gap-2 mb-4 overflow-x-auto pb-2">
+                <a href="/admin/orders" class="btn btn-sm <%= filterStatus === '' ? 'btn-primary-custom' : 'btn-secondary-custom' %>" style="border-radius: 20px; font-size: 0.8rem; padding: 6px 16px;">
+                    All Orders
+                </a>
+                <a href="/admin/orders?status=pending" class="btn btn-sm <%= filterStatus === 'pending' ? 'btn-primary-custom' : 'btn-secondary-custom' %>" style="border-radius: 20px; font-size: 0.8rem; padding: 6px 16px;">
+                    Pending
+                </a>
+                <a href="/admin/orders?status=confirmed" class="btn btn-sm <%= filterStatus === 'confirmed' ? 'btn-primary-custom' : 'btn-secondary-custom' %>" style="border-radius: 20px; font-size: 0.8rem; padding: 6px 16px;">
+                    Confirmed
+                </a>
+                <a href="/admin/orders?status=preparing" class="btn btn-sm <%= filterStatus === 'preparing' ? 'btn-primary-custom' : 'btn-secondary-custom' %>" style="border-radius: 20px; font-size: 0.8rem; padding: 6px 16px;">
+                    Preparing
+                </a>
+                <a href="/admin/orders?status=out_for_delivery" class="btn btn-sm <%= filterStatus === 'out_for_delivery' ? 'btn-primary-custom' : 'btn-secondary-custom' %>" style="border-radius: 20px; font-size: 0.8rem; padding: 6px 16px;">
+                    Out for Delivery
+                </a>
+                <a href="/admin/orders?status=delivered" class="btn btn-sm <%= filterStatus === 'delivered' ? 'btn-primary-custom' : 'btn-secondary-custom' %>" style="border-radius: 20px; font-size: 0.8rem; padding: 6px 16px;">
+                    Delivered
+                </a>
+                <a href="/admin/orders?status=cancelled" class="btn btn-sm <%= filterStatus === 'cancelled' ? 'btn-primary-custom' : 'btn-secondary-custom' %>" style="border-radius: 20px; font-size: 0.8rem; padding: 6px 16px;">
+                    Cancelled
+                </a>
+            </div>
+
+            <!-- ORDERS TABLE -->
+            <div class="dashboard-card">
+                <div class="dashboard-card-body p-0">
+                    <% if (orders && orders.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table custom-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Payment</th>
+                                        <th>Order Status</th>
+                                        <th class="text-end">Update Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% orders.forEach(order => { %>
+                                        <tr>
+                                            <td class="fw-semibold">#<%= order.order_number %></td>
+                                            <td><%= order.customer_name %></td>
+                                            <td><%= new Date(order.created_at).toLocaleString("en-IN", { dateStyle: 'medium', timeStyle: 'short' }) %></td>
+                                            <td class="fw-bold">₹<%= order.total_amount %></td>
+                                            <td>
+                                                <span class="badge <%= order.payment_status %>"><%= order.payment_status %></span>
+                                            </td>
+                                            <td>
+                                                <span class="badge <%= order.order_status %>"><%= order.order_status %></span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex justify-content-end">
+                                                    <form action="/admin/orders/<%= order.id %>/status" method="POST" class="d-inline-flex gap-2">
+                                                        <select name="order_status" class="form-control form-control-sm" style="width: auto; padding: 4px 10px; font-size: 0.8rem; border-radius: var(--radius-sm);" onchange="this.form.submit()">
+                                                            <option value="pending" <%= order.order_status === 'pending' ? 'selected' : '' %>>Pending</option>
+                                                            <option value="confirmed" <%= order.order_status === 'confirmed' ? 'selected' : '' %>>Confirmed</option>
+                                                            <option value="preparing" <%= order.order_status === 'preparing' ? 'selected' : '' %>>Preparing</option>
+                                                            <option value="ready_for_pickup" <%= order.order_status === 'ready_for_pickup' ? 'selected' : '' %>>Ready for Pickup</option>
+                                                            <option value="picked_up" <%= order.order_status === 'picked_up' ? 'selected' : '' %>>Picked Up</option>
+                                                            <option value="out_for_delivery" <%= order.order_status === 'out_for_delivery' ? 'selected' : '' %>>Out for Delivery</option>
+                                                            <option value="delivered" <%= order.order_status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                                                            <option value="cancelled" <%= order.order_status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                                            <option value="rejected" <%= order.order_status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+                                                        </select>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <div class="empty-state py-5">
+                            <i class="bi bi-cart-x"></i>
+                            <p class="mb-0">No orders found.</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <%- include("partials/footer") %>
+    </main>
+
+    <!-- SIDEBAR SCRIPT -->
+    <script>
+        const sidebar = document.getElementById("adminSidebar");
+        const adminMain = document.getElementById("adminMain");
+        const sidebarToggle = document.getElementById("sidebarToggle");
+
+        const isCollapsed = localStorage.getItem("adminSidebarCollapsed") === "true";
+        if (isCollapsed) {
+            sidebar.classList.add("collapsed");
+            adminMain.classList.add("expanded");
+        }
+
+        sidebarToggle?.addEventListener("click", () => {
+            const collapsed = sidebar.classList.toggle("collapsed");
+            adminMain.classList.toggle("expanded");
+            localStorage.setItem("adminSidebarCollapsed", collapsed);
+        });
+    </script>
+</body>
+
+</html>

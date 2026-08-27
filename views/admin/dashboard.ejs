@@ -2,159 +2,390 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Dashboard - Drinkit Admin</title>
-
-
-    <!-- Bootstrap -->
-
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
-
-
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
-
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-    >
-
-
-    <!-- Inter -->
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
-
-
-    <!-- Admin CSS -->
-
-    <link
-        rel="stylesheet"
-        href="/css/admin-layout.css"
-    >
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Admin CSS -->
+    <link rel="stylesheet" href="/css/admin-layout.css">
 </head>
 
-
 <body>
-
-
     <!-- SIDEBAR -->
-
-    <%- include("partials/sidebar", {
-        currentPage: "dashboard"
-    }) %>
-
-
+    <%- include("partials/sidebar", { currentPage: "dashboard" }) %>
 
     <!-- MAIN -->
-
-    <main class="admin-main">
-
-
+    <main class="admin-main" id="adminMain">
         <!-- NAVBAR -->
-
         <%- include("partials/navbar") %>
 
-
-
         <!-- CONTENT -->
-
+        <%
+        const defaultProductSvg = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect width="100%" height="100%" fill="%23F1F3F5"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="20" fill="%237A1535">📦</text></svg>';
+        %>
         <div class="admin-content">
-
-
             <!-- BREADCRUMB -->
-
             <div class="admin-breadcrumb">
-
-                <a href="/admin/dashboard">
-                    Admin
-                </a>
-
+                <a href="/admin/dashboard">Admin</a>
                 <i class="bi bi-chevron-right"></i>
-
-                <strong>
-                    Dashboard
-                </strong>
-
+                <strong>Dashboard</strong>
             </div>
 
+            <!-- DASHBOARD HEADER -->
+            <div class="dashboard-header d-flex justify-content-between align-items-center position-relative overflow-hidden p-4 mb-4" style="background-color: var(--white); border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: var(--shadow-subtle);">
+                <div class="position-relative" style="z-index: 2;">
+                    <h1 class="fw-bold mb-1" style="font-size: 1.6rem; color: var(--text-main); letter-spacing: -0.5px;">Dashboard</h1>
+                    <p class="text-muted mb-0" style="font-size: 0.9rem;">Good morning, Admin 👋 Here's what's happening with your store today.</p>
+                </div>
+                <!-- Subtle brand accent background decoration -->
+                <div class="brand-decoration-bg"></div>
+            </div>
 
-            <!-- YOUR DASHBOARD CONTENT -->
+            <!-- STATISTICS CARDS -->
+            <div class="stats-grid">
+                <!-- PRODUCTS CARD -->
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Products</span>
+                        <div class="stat-card-icon products">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card-value"><%= stats.totalProducts %></div>
+                    <span class="stat-card-desc">Total products in catalog</span>
+                </div>
 
-            <h1>
-                Dashboard
-            </h1>
+                <!-- ORDERS CARD -->
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Orders</span>
+                        <div class="stat-card-icon orders">
+                            <i class="bi bi-bag-check"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card-value"><%= stats.totalOrders %></div>
+                    <span class="stat-card-desc">Total orders placed</span>
+                </div>
 
+                <!-- CUSTOMERS CARD -->
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Customers</span>
+                        <div class="stat-card-icon customers">
+                            <i class="bi bi-people"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card-value"><%= stats.totalCustomers %></div>
+                    <span class="stat-card-desc">Registered retail customers</span>
+                </div>
 
+                <!-- REVENUE CARD -->
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Revenue</span>
+                        <div class="stat-card-icon revenue">
+                            <i class="bi bi-currency-rupee"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card-value">₹<%= stats.totalRevenue.toLocaleString("en-IN") %></div>
+                    <span class="stat-card-desc">Paid orders total revenue</span>
+                </div>
+            </div>
+
+            <!-- ROW 1: SALES CHART & RECENT ORDERS -->
+            <div class="dashboard-sections-grid">
+                <!-- Sales Overview Chart -->
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <span class="dashboard-card-title">Sales Overview</span>
+                        <span class="badge status info">This Week</span>
+                    </div>
+                    <div class="dashboard-card-body" style="position: relative; min-height: 320px;">
+                        <% if (salesData && salesData.length > 0) { %>
+                            <canvas id="salesChart"></canvas>
+                        <% } else { %>
+                            <div class="empty-state h-100 d-flex flex-column align-items-center justify-content-center">
+                                <i class="bi bi-bar-chart"></i>
+                                <p>No sales data available for this period.</p>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Recent Orders -->
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <span class="dashboard-card-title">Recent Orders</span>
+                        <a href="/admin/orders" class="btn btn-sm btn-link text-decoration-none p-0" style="color: var(--primary); font-size: 0.85rem; font-weight: 600;">View All</a>
+                    </div>
+                    <div class="dashboard-card-body p-0">
+                        <% if (recentOrders && recentOrders.length > 0) { %>
+                            <div class="table-responsive">
+                                <table class="table custom-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% recentOrders.forEach(order => { %>
+                                            <tr>
+                                                <td class="fw-semibold">#<%= order.order_number %></td>
+                                                <td><%= order.customer_name %></td>
+                                                <td>₹<%= order.total_amount %></td>
+                                                <td>
+                                                    <span class="badge <%= order.order_status %>"><%= order.order_status %></span>
+                                                </td>
+                                            </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <% } else { %>
+                            <div class="empty-state py-5">
+                                <i class="bi bi-bag-x"></i>
+                                <p class="mb-0">No recent orders yet.</p>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROW 2: TOP PRODUCTS, LOW STOCK, CATEGORIES & QUICK ACTIONS -->
+            <div class="row g-4 mb-4">
+                <!-- Top Products -->
+                <div class="col-lg-4">
+                    <div class="dashboard-card h-100">
+                        <div class="dashboard-card-header">
+                            <span class="dashboard-card-title">Top Selling Products</span>
+                        </div>
+                        <div class="dashboard-card-body p-0">
+                            <% if (topProducts && topProducts.length > 0) { %>
+                                <table class="table custom-table mb-0">
+                                    <tbody>
+                                        <% topProducts.forEach(product => { %>
+                                            <tr>
+                                                <td>
+                                                    <div class="table-product-cell">
+                                                        <img src="<%= product.image || defaultProductSvg %>" alt="<%= product.name %>" class="table-product-image" onerror="this.onerror=null; this.src='<%= defaultProductSvg %>'">
+                                                        <div class="table-product-info">
+                                                            <span class="table-product-name" style="font-size: 0.82rem;"><%= product.name %></span>
+                                                            <span class="text-muted" style="font-size: 0.72rem;"><%= product.category_name %></span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-end">
+                                                    <div class="fw-semibold" style="font-size: 0.82rem;"><%= product.sold_count %> sold</div>
+                                                    <div class="text-muted" style="font-size: 0.72rem;">₹<%= product.revenue %></div>
+                                                </td>
+                                            </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            <% } else { %>
+                                <div class="empty-state py-5">
+                                    <i class="bi bi-award"></i>
+                                    <p class="mb-0">No sales information is available yet.</p>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Low Stock Alert -->
+                <div class="col-lg-4">
+                    <div class="dashboard-card h-100">
+                        <div class="dashboard-card-header">
+                            <span class="dashboard-card-title">Low Stock Alert</span>
+                        </div>
+                        <div class="dashboard-card-body">
+                            <% if (lowStockProducts && lowStockProducts.length > 0) { %>
+                                <div class="alert-list">
+                                    <% lowStockProducts.forEach(product => { %>
+                                        <div class="alert-item">
+                                            <img src="<%= product.image || defaultProductSvg %>" alt="<%= product.name %>" class="alert-item-img" onerror="this.onerror=null; this.src='<%= defaultProductSvg %>'">
+                                            <div class="alert-item-info">
+                                                <span class="alert-item-title"><%= product.name %></span>
+                                                <span class="alert-item-desc">Only <%= product.stock_quantity %> left in stock</span>
+                                            </div>
+                                        </div>
+                                    <% }) %>
+                                </div>
+                            <% } else { %>
+                                <div class="empty-state py-5">
+                                    <i class="bi bi-shield-check text-success"></i>
+                                    <p class="mb-0 text-success">All products are sufficiently stocked.</p>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Categories & Quick Actions -->
+                <div class="col-lg-4">
+                    <div class="dashboard-card h-100">
+                        <div class="dashboard-card-header">
+                            <span class="dashboard-card-title">Quick Tasks</span>
+                        </div>
+                        <div class="dashboard-card-body d-flex flex-column gap-4">
+                            <!-- Quick Actions -->
+                            <div>
+                                <div class="quick-actions-grid">
+                                    <a href="/admin/products/add" class="quick-action-btn">
+                                        <i class="bi bi-plus-circle"></i>
+                                        <span>Add Product</span>
+                                    </a>
+                                    <a href="/admin/orders" class="quick-action-btn">
+                                        <i class="bi bi-cart"></i>
+                                        <span>Manage Orders</span>
+                                    </a>
+                                    <a href="/admin/customers" class="quick-action-btn">
+                                        <i class="bi bi-people"></i>
+                                        <span>Customers</span>
+                                    </a>
+                                    <a href="/admin/categories" class="quick-action-btn">
+                                        <i class="bi bi-tags"></i>
+                                        <span>Categories</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Category list -->
+                            <div>
+                                <h6 class="fw-bold mb-3" style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Category Distribution</h6>
+                                <% if (categoriesOverview && categoriesOverview.length > 0) { %>
+                                    <div class="d-flex flex-column gap-2" style="max-height: 180px; overflow-y: auto; padding-right: 4px;">
+                                        <% categoriesOverview.forEach(cat => { %>
+                                            <div class="d-flex justify-content-between align-items-center p-2 rounded-3 border bg-light">
+                                                <span class="fw-semibold" style="font-size: 0.82rem;"><%= cat.name %></span>
+                                                <span class="badge rounded-pill bg-white text-dark border" style="font-size: 0.72rem;"><%= cat.product_count %> Products</span>
+                                            </div>
+                                        <% }) %>
+                                    </div>
+                                <% } else { %>
+                                    <p class="text-muted small mb-0">No category mapping found.</p>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-
-
         <!-- FOOTER -->
-
         <%- include("partials/footer") %>
-
-
     </main>
 
-
-
-    <!-- SIDEBAR SCRIPT -->
-
+    <!-- JS SCRIPTS -->
     <script>
+        // Sidebar collapse logic
+        const sidebar = document.getElementById("adminSidebar");
+        const adminMain = document.getElementById("adminMain");
+        const sidebarToggle = document.getElementById("sidebarToggle");
 
-        const sidebar =
-            document.getElementById("adminSidebar");
+        // Load saved state
+        const isCollapsed = localStorage.getItem("adminSidebarCollapsed") === "true";
+        if (isCollapsed) {
+            sidebar.classList.add("collapsed");
+            adminMain.classList.add("expanded");
+        }
 
-        const sidebarToggle =
-            document.getElementById("sidebarToggle");
+        sidebarToggle?.addEventListener("click", () => {
+            const collapsed = sidebar.classList.toggle("collapsed");
+            adminMain.classList.toggle("expanded");
+            localStorage.setItem("adminSidebarCollapsed", collapsed);
+        });
 
-
-        sidebarToggle?.addEventListener(
-            "click",
-            () => {
-
-                sidebar.classList.toggle("show");
-
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener("click", (event) => {
+            if (
+                window.innerWidth <= 991 &&
+                sidebar.classList.contains("show") &&
+                !sidebar.contains(event.target) &&
+                !sidebarToggle.contains(event.target)
+            ) {
+                sidebar.classList.remove("show");
             }
-        );
+        });
 
-
-        // Close sidebar when clicking outside
-
-        document.addEventListener(
-            "click",
-            (event) => {
-
-                if (
-                    window.innerWidth <= 991 &&
-                    sidebar.classList.contains("show") &&
-                    !sidebar.contains(event.target) &&
-                    !sidebarToggle.contains(event.target)
-                ) {
-
-                    sidebar.classList.remove("show");
-
-                }
-
+        // Mobile drawer opening helper
+        sidebarToggle?.addEventListener("click", (e) => {
+            if (window.innerWidth <= 991) {
+                e.stopPropagation();
+                sidebar.classList.add("show");
             }
-        );
-
+        });
     </script>
 
-
+    <% if (salesData && salesData.length > 0) { %>
+        <script>
+            // Sales Chart Setup
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            const salesData = <%- JSON.stringify(salesData) %>;
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: salesData.map(d => d.date),
+                    datasets: [{
+                        label: 'Sales Revenue (₹)',
+                        data: salesData.map(d => Number(d.amount)),
+                        borderColor: '#7A1535',
+                        backgroundColor: 'rgba(122, 21, 53, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: '#7A1535'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#F1F5F9'
+                            },
+                            ticks: {
+                                color: '#64748B',
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#64748B',
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+    <% } %>
 </body>
 
 </html>

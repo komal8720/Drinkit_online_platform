@@ -1,211 +1,99 @@
-
-<link rel="stylesheet" href="css/admin-layout.css">
 <aside class="admin-sidebar" id="adminSidebar">
-
     <!-- BRAND -->
-
-    <div class="sidebar-brand">
-
+    <div class="sidebar-brand" style="border-bottom: 1px solid var(--border-color);">
         <a href="/admin/dashboard">
-
             <div class="sidebar-brand-icon">
                 <i class="bi bi-cup-straw"></i>
             </div>
-
             <div class="sidebar-brand-name">
                 Drink<span>it</span>
             </div>
-
         </a>
-
     </div>
 
-
     <!-- MENU -->
-
     <nav class="sidebar-menu">
-
-
+        <!-- OVERVIEW SECTION -->
         <div class="sidebar-section-title">
             Overview
         </div>
-
-
-        <a
-            href="/admin/dashboard"
-            class="sidebar-link <%= currentPage === 'dashboard' ? 'active' : '' %>"
-        >
-
+        <a href="/admin/dashboard" class="sidebar-link <%= currentPage === 'dashboard' ? 'active' : '' %>">
             <i class="bi bi-grid-1x2-fill"></i>
-
             <span>Dashboard</span>
-
         </a>
 
-
-
+        <!-- CATALOG SECTION -->
         <div class="sidebar-section-title">
-            Management
+            Catalog
         </div>
-
-
-        <a
-            href="/admin/products"
-            class="sidebar-link <%= currentPage === 'products' ? 'active' : '' %>"
-        >
-
+        <a href="/admin/products" class="sidebar-link <%= currentPage === 'products' ? 'active' : '' %>">
             <i class="bi bi-box-seam"></i>
-
             <span>Products</span>
-
         </a>
-
-
-        <a
-            href="/admin/categories"
-            class="sidebar-link <%= currentPage === 'categories' ? 'active' : '' %>"
-        >
-
+        <a href="/admin/categories" class="sidebar-link <%= currentPage === 'categories' ? 'active' : '' %>">
             <i class="bi bi-tags"></i>
-
             <span>Categories</span>
-
         </a>
 
-
-        <a
-            href="/admin/orders"
-            class="sidebar-link <%= currentPage === 'orders' ? 'active' : '' %>"
-        >
-
+        <!-- ORDERS & CUSTOMERS SECTION -->
+        <div class="sidebar-section-title">
+            Orders & Customers
+        </div>
+        <a href="/admin/orders" class="sidebar-link <%= currentPage === 'orders' ? 'active' : '' %>">
             <i class="bi bi-bag-check"></i>
-
             <span>Orders</span>
-
-            <span class="menu-badge">
-                12
-            </span>
-
         </a>
-
-
-        <a
-            href="/admin/customers"
-            class="sidebar-link <%= currentPage === 'customers' ? 'active' : '' %>"
-        >
-
+        <a href="/admin/customers" class="sidebar-link <%= currentPage === 'customers' ? 'active' : '' %>">
             <i class="bi bi-people"></i>
-
             <span>Customers</span>
-
         </a>
 
-
-
+        <!-- BUSINESS SECTION -->
         <div class="sidebar-section-title">
             Business
         </div>
-
-
-        <a
-            href="/admin/vendors"
-            class="sidebar-link <%= currentPage === 'vendors' ? 'active' : '' %>"
-        >
-
+        <a href="/admin/vendors" class="sidebar-link <%= currentPage === 'vendors' ? 'active' : '' %>">
             <i class="bi bi-shop"></i>
-
             <span>Vendors</span>
-
         </a>
-
-
-        <a
-            href="/admin/payments"
-            class="sidebar-link <%= currentPage === 'payments' ? 'active' : '' %>"
-        >
-
+        <a href="/admin/payments" class="sidebar-link <%= currentPage === 'payments' ? 'active' : '' %>">
             <i class="bi bi-credit-card"></i>
-
             <span>Payments</span>
-
         </a>
-
-
-        <a
-            href="/admin/reports"
-            class="sidebar-link <%= currentPage === 'reports' ? 'active' : '' %>"
-        >
-
+        <a href="/admin/reports" class="sidebar-link <%= currentPage === 'reports' ? 'active' : '' %>">
             <i class="bi bi-bar-chart-line"></i>
-
             <span>Reports & Analytics</span>
-
         </a>
 
-
-
+        <!-- SYSTEM SECTION -->
         <div class="sidebar-section-title">
             System
         </div>
-
-
-        <a
-            href="/admin/settings"
-            class="sidebar-link <%= currentPage === 'settings' ? 'active' : '' %>"
-        >
-
+        <a href="/admin/settings" class="sidebar-link <%= currentPage === 'settings' ? 'active' : '' %>">
             <i class="bi bi-gear"></i>
-
             <span>Settings</span>
-
         </a>
-
-
-        <a
-            href="/admin/profile"
-            class="sidebar-link <%= currentPage === 'profile' ? 'active' : '' %>"
-        >
-
+        <a href="/admin/profile" class="sidebar-link <%= currentPage === 'profile' ? 'active' : '' %>">
             <i class="bi bi-person-circle"></i>
-
             <span>Admin Profile</span>
-
         </a>
-
+        <a href="/admin/logout" class="sidebar-link">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+        </a>
     </nav>
 
-
-
     <!-- BOTTOM PROFILE -->
-
     <div class="sidebar-bottom">
-
         <div class="sidebar-admin-profile">
-
             <div class="admin-avatar">
-
-                <i class="bi bi-person-fill"></i>
-
+                A
             </div>
-
-
             <div class="admin-info">
-
-                <strong>
-                    Administrator
-                </strong>
-
-                <span>
-                    Super Admin 
-                </span>
-
+                <strong>Administrator</strong>
+                <span>Super Admin</span>
             </div>
-
-
-            <i class="bi bi-three-dots admin-profile-menu"></i>
-
+            <i class="bi bi-three-dots admin-profile-menu" id="adminProfileMenuBtn" title="Options"></i>
         </div>
-
     </div>
-
 </aside>
