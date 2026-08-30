@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/user/home.css">
+    <style>
+        .success-page-container {
+            padding-top: 60px;
+            padding-bottom: 80px;
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .success-card {
+            background-color: #ffffff;
+            border: 1px solid var(--drinkit-border);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 550px;
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            text-align: center;
+        }
+        .success-icon-wrapper {
+            width: 80px;
+            height: 80px;
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 24px auto;
+        }
+        .success-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--drinkit-text);
+            margin-bottom: 12px;
+        }
+        .success-subtitle {
+            color: var(--drinkit-muted);
+            font-size: 15px;
+            margin-bottom: 30px;
+        }
+        .success-details-box {
+            background-color: var(--drinkit-wine-light);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+        .detail-row span:first-child {
+            color: var(--drinkit-muted);
+        }
+        .detail-row span:last-child {
+            color: var(--drinkit-text);
+        }
+        .btn-drinkit-wine {
+            background-color: var(--drinkit-wine);
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 10px;
+            padding: 12px 24px;
+            border: none;
+            transition: 0.2s;
+            display: inline-block;
+            text-decoration: none;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+        .btn-drinkit-wine:hover {
+            background-color: var(--drinkit-wine-dark);
+            color: #ffffff;
+        }
+        .btn-drinkit-outline {
+            background-color: transparent;
+            color: var(--drinkit-wine);
+            border: 1px solid var(--drinkit-wine);
+            font-weight: 700;
+            border-radius: 10px;
+            padding: 12px 24px;
+            transition: 0.2s;
+            display: inline-block;
+            text-decoration: none;
+            width: 100%;
+        }
+        .btn-drinkit-outline:hover {
+            background-color: var(--drinkit-wine-light);
+            color: var(--drinkit-wine);
+        }
+    </style>
+</head>
+<body>
+
+<%- include('../partials/navbar') %>
+
+<div class="container success-page-container">
+    
+    <div class="success-card">
+        
+        <!-- Icon -->
+        <div class="success-icon-wrapper">
+            <i class="bi bi-check-lg"></i>
+        </div>
+
+        <!-- Text -->
+        <h2 class="success-title">Order Placed Successfully!</h2>
+        <p class="success-subtitle">Thank you for ordering from Drinkit. Your delivery is being prepared.</p>
+
+        <!-- Receipt Box -->
+        <div class="success-details-box">
+            <div class="detail-row">
+                <span>Order Number:</span>
+                <span class="fw-bold text-dark">#<%= order.order_number %></span>
+            </div>
+            <div class="detail-row">
+                <span>Estimated Delivery:</span>
+                <span class="text-success fw-bold">30 Minutes</span>
+            </div>
+            <div class="detail-row">
+                <span>Delivering To:</span>
+                <span class="text-dark"><%= order.address_name %></span>
+            </div>
+            <div class="detail-row">
+                <span>Total Paid:</span>
+                <span class="fw-bold text-wine">₹<%= parseInt(order.total_amount) %></span>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <a href="/orders/<%= order.id %>" class="btn-drinkit-wine">
+            <i class="bi bi-geo-alt-fill me-1"></i> Track Order
+        </a>
+
+        <a href="/products" class="btn-drinkit-outline">
+            Continue Shopping
+        </a>
+
+    </div>
+
+</div>
+
+<%- include('../partials/footer') %>
+
+</body>
+</html>

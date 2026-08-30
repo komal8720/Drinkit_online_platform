@@ -2750,3 +2750,85 @@ background-size: cover;
 
     transform: translateY(-1px);
 }
+
+
+/* ==========================================================
+   BLINKIT-STYLE QUANTITY SELECTOR
+========================================================== */
+
+.product-quantity-control {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #32872d !important; /* matching Drinkit add hover green */
+    color: #ffffff !important;
+    border: 1px solid #32872d !important;
+    border-radius: 7px !important;
+    height: 28px !important; /* matching category-add-btn height */
+    min-width: 72px !important;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+/* Adjustments for shop page and details page alignment */
+.product-card .product-quantity-control {
+    width: 82px !important;
+    height: 32px !important; /* matching products.ejs add-cart-btn */
+}
+
+.details-action-buttons .product-quantity-control {
+    width: 140px !important;
+    height: 45px !important; /* matching details page button */
+}
+
+.product-quantity-control .qty-minus,
+.product-quantity-control .qty-plus {
+    border: none !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    width: 24px !important;
+    height: 100% !important;
+    cursor: pointer;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    padding: 0 !important;
+    outline: none !important;
+}
+
+.details-action-buttons .product-quantity-control .qty-minus,
+.details-action-buttons .product-quantity-control .qty-plus {
+    font-size: 20px !important;
+    width: 45px !important;
+}
+
+.product-quantity-control .qty-minus:hover,
+.product-quantity-control .qty-plus:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.product-quantity-control .qty-minus:active,
+.product-quantity-control .qty-plus:active {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.product-quantity-control .qty-value {
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    min-width: 16px !important;
+    text-align: center !important;
+}
+
+.details-action-buttons .product-quantity-control .qty-value {
+    font-size: 16px !important;
+}
+
+.product-quantity-control button:disabled {
+    opacity: 0.5 !important;
+    pointer-events: none !important;
+}

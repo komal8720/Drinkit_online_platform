@@ -193,6 +193,11 @@
             background: var(--drinkit-wine-dark);
             color: #ffffff;
         }
+        .checkout-btn:disabled {
+            background: #dcd7d8 !important;
+            color: #888082 !important;
+            cursor: not-allowed !important;
+        }
         .empty-cart-card {
             text-align: center;
             background: #ffffff;
@@ -258,6 +263,19 @@
     <div class="row g-4" id="cartActiveContent" style="<%= cartItems.length === 0 ? 'display: none;' : '' %>">
         <!-- Left: Cart Items List -->
         <div class="col-lg-8">
+            <!-- Global Stock Warning Alert Banner -->
+            <% 
+                let hasGlobalStockIssue = false; 
+                cartItems.forEach(item => {
+                    if (item.stock_quantity === 0 || item.quantity > item.stock_quantity) {
+                        hasGlobalStockIssue = true;
+                    }
+                });
+            %>
+            <div class="alert alert-danger" id="cartGlobalStockAlert" style="border-radius: 12px; font-weight: 700; font-size: 14px; <%= hasGlobalStockIssue ? '' : 'display: none;' %>">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> Some items in your cart are unavailable. Please update your cart to continue.
+            </div>
+
             <div id="cartItemsList">
                 <% cartItems.forEach(item => { %>
                     <div class="cart-item-card d-flex align-items-center justify-content-between flex-wrap gap-3" id="cartItem-<%= item.cart_item_id %>">
@@ -282,17 +300,26 @@
                                     <% } %>
                                     <span class="cart-item-price">₹<%= parseInt(item.product_price) %></span>
                                 </div>
+                                <div class="stock-info-container mt-1">
+                                    <% if (item.stock_quantity === 0) { %>
+                                        <span class="text-danger small fw-bold d-block stock-warning-lbl" id="stockWarning-<%= item.cart_item_id %>" data-stock="0">Out of Stock</span>
+                                    <% } else if (item.stock_quantity < item.quantity) { %>
+                                        <span class="text-danger small fw-bold d-block stock-warning-lbl" id="stockWarning-<%= item.cart_item_id %>" data-stock="<%= item.stock_quantity %>">Only <%= item.stock_quantity %> available</span>
+                                    <% } else { %>
+                                        <span class="text-success small fw-semibold d-block stock-warning-lbl" id="stockWarning-<%= item.cart_item_id %>" data-stock="<%= item.stock_quantity %>" style="display: none;">In Stock</span>
+                                    <% } %>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Quantity Selector -->
                         <div class="d-flex align-items-center gap-4">
                             <div class="cart-qty-selector">
-                                <button class="cart-qty-btn qty-minus" data-item-id="<%= item.cart_item_id %>">
+                                <button class="cart-qty-btn qty-minus" data-item-id="<%= item.cart_item_id %>" <%= item.stock_quantity === 0 ? 'disabled' : '' %>>
                                     <i class="bi bi-minus"></i>
                                 </button>
                                 <input type="text" class="cart-qty-input" id="qtyInput-<%= item.cart_item_id %>" value="<%= item.quantity %>" readonly>
-                                <button class="cart-qty-btn qty-plus" data-item-id="<%= item.cart_item_id %>">
+                                <button class="cart-qty-btn qty-plus" data-item-id="<%= item.cart_item_id %>" <%= (item.stock_quantity === 0 || item.quantity >= item.stock_quantity) ? 'disabled' : '' %>>
                                     <i class="bi bi-plus"></i>
                                 </button>
                             </div>
@@ -347,7 +374,7 @@
                     <span class="total-price" id="summaryTotal">₹<%= parseInt(total) %></span>
                 </div>
 
-                <button class="checkout-btn">
+                <button class="checkout-btn" id="btnProceedCheckout" onclick="window.location.href='/checkout'" <%= hasGlobalStockIssue ? 'disabled' : '' %>>
                     Proceed to Checkout <i class="bi bi-arrow-right ms-1"></i>
                 </button>
             </div>
@@ -374,6 +401,8 @@
 <script>
 $(document).ready(function() {
     
+    // Check initial stock limits on cart load
+    checkCartStockStatus();
     // 1. Update Cart Quantity via AJAX
     function updateQty(itemId, newQty, qtyInput) {
         fetch("/cart/update", {
@@ -383,9 +412,12 @@ $(document).ready(function() {
             },
             body: JSON.stringify({ itemId: itemId, quantity: newQty })
         })
-        .then(res => {
-            if (!res.ok) throw new Error("Update failed");
-            return res.json();
+        .then(async res => {
+            const data = await res.json();
+            if (!res.ok) {
+                throw { message: data.message, availableStock: data.availableStock };
+            }
+            return data;
         })
         .then(data => {
             if (data.success) {
@@ -400,10 +432,31 @@ $(document).ready(function() {
                 // Update Item Total on card
                 $(`#itemTotal-${itemId}`).text("₹" + (itemPrice * newQty));
 
+                // Clear or update this item's warning label
+                const warningLbl = $(`#stockWarning-${itemId}`);
+                const stock = parseInt(warningLbl.data("stock"));
+                
+                if (newQty >= stock) {
+                    card.find(".qty-plus").prop("disabled", true);
+                } else {
+                    card.find(".qty-plus").prop("disabled", false);
+                }
+                
+                if (stock > 0 && newQty > stock) {
+                    warningLbl.text(`Only ${stock} available`).show();
+                } else if (stock === 0) {
+                    warningLbl.text("Out of Stock").show();
+                } else {
+                    warningLbl.hide();
+                }
+
                 // Update Order Summary Card
                 $("#summarySubtotal").text("₹" + parseInt(data.subtotal));
                 $("#summaryDelivery").text(data.deliveryFee === 0 ? "FREE" : "₹" + parseInt(data.deliveryFee));
                 $("#summaryTotal").text("₹" + parseInt(data.total));
+
+                // Check overall cart stock status
+                checkCartStockStatus();
 
                 // Update Free Delivery Banner/Alert
                 const alertContainer = $(".summary-card .alert");
@@ -420,13 +473,35 @@ $(document).ready(function() {
                 if (badge.length) {
                     badge.text(data.cartCount);
                 }
-            } else {
-                alert(data.message || "Failed to update quantity.");
             }
         })
         .catch(err => {
             console.error("Error updating quantity:", err);
-            alert("Unable to update cart. Please try again.");
+            if (err && err.availableStock !== undefined) {
+                const stock = err.availableStock;
+                qtyInput.val(stock);
+                
+                const card = $(`#cartItem-${itemId}`);
+                card.find(".qty-plus").prop("disabled", true);
+                
+                const warningLbl = $(`#stockWarning-${itemId}`);
+                warningLbl.data("stock", stock);
+                if (stock === 0) {
+                    warningLbl.text("Out of Stock").show();
+                } else {
+                    warningLbl.text(`Only ${stock} available`).show();
+                }
+                
+                // Recalculate item total locally
+                const priceText = card.find(".cart-item-price").text().replace("₹", "").trim();
+                const itemPrice = parseInt(priceText) || 0;
+                $(`#itemTotal-${itemId}`).text("₹" + (itemPrice * stock));
+                
+                // Refresh full cart totals
+                location.reload();
+            } else {
+                alert(err.message || "Unable to update cart. Please try again.");
+            }
         });
     }
 
@@ -510,6 +585,26 @@ $(document).ready(function() {
             removeItem(itemId);
         }
     });
+
+    // Helper to evaluate and flag stock limits across all cart lines
+    function checkCartStockStatus() {
+        let hasIssue = false;
+        $(".stock-warning-lbl").each(function() {
+            const warningText = $(this).text().toLowerCase();
+            const isVisible = $(this).is(":visible");
+            if (isVisible && (warningText.includes("out of stock") || warningText.includes("only"))) {
+                hasIssue = true;
+            }
+        });
+
+        if (hasIssue) {
+            $("#cartGlobalStockAlert").show();
+            $("#btnProceedCheckout").prop("disabled", true);
+        } else {
+            $("#cartGlobalStockAlert").hide();
+            $("#btnProceedCheckout").prop("disabled", false);
+        }
+    }
 });
 </script>
 </body>

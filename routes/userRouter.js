@@ -179,16 +179,6 @@ router.get("/profile", ensureAuthenticated, (req, res) => {
 });
 
 
-// ==========================================================
-// ORDERS
-// ==========================================================
-
-router.get("/orders", ensureAuthenticated, (req, res) => {
-    res.render("user/orders", {
-        title: "My Orders - Drinkit",
-        user: req.session.user
-    });
-});
 
 
 // ==========================================================
@@ -214,7 +204,8 @@ router.get("/cart", ensureAuthenticated, async (req, res, next) => {
         // 1. Get cart items joining products
         const [cartItems] = await pool.query(
             `SELECT ci.id as cart_item_id, ci.quantity, ci.price as cart_item_price, 
-                    p.id as product_id, p.name, p.slug, p.image, p.bottle_size, p.price as product_price, p.sale_price
+                    p.id as product_id, p.name, p.slug, p.image, p.bottle_size, p.price as product_price, p.sale_price,
+                    p.stock_quantity
              FROM carts c
              JOIN cart_items ci ON c.id = ci.cart_id
              JOIN products p ON ci.product_id = p.id
@@ -452,6 +443,24 @@ router.post("/cart/update", async (req, res) => {
         const productId = rows[0].product_id;
         const cartId = rows[0].cart_id;
 
+        // Check stock quantity from database
+        const [[product]] = await pool.query(
+            "SELECT stock_quantity, name FROM products WHERE id = ? LIMIT 1",
+            [productId]
+        );
+
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Product not found." });
+        }
+
+        if (qty > product.stock_quantity) {
+            return res.status(400).json({ 
+                success: false, 
+                message: `Only ${product.stock_quantity} items available in stock for "${product.name}".`,
+                availableStock: product.stock_quantity
+            });
+        }
+
         // Update quantity in cart_items
         await pool.query("UPDATE cart_items SET quantity = ? WHERE id = ?", [qty, itemId]);
 
@@ -559,6 +568,700 @@ router.post("/cart/remove", async (req, res) => {
     } catch (err) {
         console.error("Error removing item from cart:", err);
         return res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
+
+// ==========================================================
+// GET ACTIVE CART ITEMS (AJAX Endpoint for State Hydration)
+// ==========================================================
+router.get("/cart/items", async (req, res) => {
+    if (!req.session.user) {
+        return res.json({ success: true, items: [] });
+    }
+    const userId = req.session.user.id;
+    try {
+        const [items] = await pool.query(
+            `SELECT ci.product_id, ci.quantity 
+             FROM cart_items ci 
+             JOIN carts c ON ci.cart_id = c.id 
+             WHERE c.user_id = ?`,
+            [userId]
+        );
+        return res.json({ success: true, items });
+    } catch (err) {
+        console.error("Error fetching cart items:", err);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
+// ==========================================================
+// UPDATE CART QUANTITY BY PRODUCT ID (AJAX Endpoint)
+// ==========================================================
+router.post("/cart/update-quantity", async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+    const { productId, quantity } = req.body;
+    const userId = req.session.user.id;
+    const qty = parseInt(quantity);
+
+    if (!productId || isNaN(qty) || qty < 0) {
+        return res.status(400).json({ success: false, message: "Invalid parameters." });
+    }
+
+    try {
+        // 1. Get or create cart for user
+        let cartId;
+        const [carts] = await pool.query("SELECT id FROM carts WHERE user_id = ? LIMIT 1", [userId]);
+        if (carts.length === 0) {
+            const [result] = await pool.query("INSERT INTO carts (user_id) VALUES (?)", [userId]);
+            cartId = result.insertId;
+        } else {
+            cartId = carts[0].id;
+        }
+
+        // 2. Perform insert, update or delete based on quantity
+        if (qty === 0) {
+            // Delete item from cart_items
+            await pool.query("DELETE FROM cart_items WHERE cart_id = ? AND product_id = ?", [cartId, productId]);
+            
+            // Delete from fallback flat cart table
+            try {
+                await pool.query("DELETE FROM cart WHERE user_id = ? AND product_id = ?", [userId, productId]);
+            } catch (flatErr) {
+                console.error("Flat cart delete error:", flatErr.message);
+            }
+        } else {
+            // Fetch product price and stock (Validate product exists)
+            const [products] = await pool.query("SELECT price, stock_quantity, name FROM products WHERE id = ? LIMIT 1", [productId]);
+            if (products.length === 0) {
+                return res.status(404).json({ success: false, message: "Product not found." });
+            }
+            const price = products[0].price;
+            const stock = products[0].stock_quantity;
+
+            if (qty > stock) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: `Only ${stock} items available in stock for "${products[0].name}".`,
+                    availableStock: stock
+                });
+            }
+
+            // Upsert in cart_items
+            const [items] = await pool.query("SELECT id FROM cart_items WHERE cart_id = ? AND product_id = ? LIMIT 1", [cartId, productId]);
+            if (items.length > 0) {
+                await pool.query("UPDATE cart_items SET quantity = ? WHERE id = ?", [qty, items[0].id]);
+            } else {
+                await pool.query("INSERT INTO cart_items (cart_id, product_id, quantity, price) VALUES (?, ?, ?, ?)", [cartId, productId, qty, price]);
+            }
+
+            // Sync with fallback flat cart table
+            try {
+                const [flatItems] = await pool.query("SELECT quantity FROM cart WHERE user_id = ? AND product_id = ? LIMIT 1", [userId, productId]);
+                if (flatItems.length > 0) {
+                    await pool.query("UPDATE cart SET quantity = ? WHERE user_id = ? AND product_id = ?", [qty, userId, productId]);
+                } else {
+                    await pool.query("INSERT INTO cart (cart_id, user_id, product_id, quantity) VALUES (?, ?, ?, ?)", [cartId, userId, productId, qty]);
+                }
+            } catch (flatErr) {
+                console.error("Flat cart sync error:", flatErr.message);
+            }
+        }
+
+        // 3. Recalculate totals
+        const [items] = await pool.query(
+            `SELECT ci.quantity, ci.price FROM cart_items ci JOIN carts c ON ci.cart_id = c.id WHERE c.user_id = ?`,
+            [userId]
+        );
+        let subtotal = 0;
+        let cartCount = 0;
+        items.forEach(item => {
+            subtotal += item.quantity * item.price;
+            cartCount += item.quantity;
+        });
+
+        const deliveryFee = subtotal > 500 || items.length === 0 ? 0 : 49;
+        const total = subtotal + deliveryFee;
+
+        return res.json({
+            success: true,
+            subtotal,
+            deliveryFee,
+            total,
+            cartCount
+        });
+    } catch (err) {
+        console.error("Error updating cart quantity:", err);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
+
+// ==========================================================
+// CHECKOUT ROUTES
+// ==========================================================
+
+// GET /checkout - Renders the checkout page
+router.get("/checkout", ensureAuthenticated, async (req, res, next) => {
+    try {
+        const userId = req.session.user.id;
+
+        // 1. Get cart items joining products
+        const [cartItems] = await pool.query(
+            `SELECT ci.id as cart_item_id, ci.quantity, ci.price as cart_item_price, 
+                    p.id as product_id, p.name, p.slug, p.image, p.bottle_size, p.price as product_price, p.sale_price,
+                    p.is_age_restricted, cat.slug as category_slug, cat.name as category_name, p.stock_quantity
+             FROM carts ct
+             JOIN cart_items ci ON ct.id = ci.cart_id
+             JOIN products p ON ci.product_id = p.id
+             JOIN categories cat ON p.category_id = cat.id
+             WHERE ct.user_id = ?`,
+            [userId]
+        );
+
+        // 2. Verify cart is not empty
+        if (cartItems.length === 0) {
+            req.flash("error", "Your cart is empty. Please add items to your cart before checking out.");
+            return res.redirect("/cart");
+        }
+
+        // 3. Recalculate totals, check stock limits and age requirements
+        let subtotal = 0;
+        let isAgeRestricted = false;
+        let requiredAge = 0;
+        let hasStockIssue = false;
+
+        cartItems.forEach(item => {
+            if (item.stock_quantity === 0 || item.quantity > item.stock_quantity) {
+                hasStockIssue = true;
+            }
+            subtotal += item.quantity * item.product_price;
+            if (item.is_age_restricted) {
+                isAgeRestricted = true;
+                if (item.category_slug === "spirits") {
+                    requiredAge = Math.max(requiredAge, 25);
+                } else if (item.category_slug === "beer" || item.category_slug === "wine") {
+                    requiredAge = Math.max(requiredAge, 21);
+                } else {
+                    requiredAge = Math.max(requiredAge, 18);
+                }
+            }
+        });
+
+        if (hasStockIssue) {
+            req.flash("error", "Some items in your cart have insufficient stock. Please update your cart to continue.");
+            return res.redirect("/cart");
+        }
+
+        const deliveryFee = subtotal > 500 ? 0 : 49;
+        const discount = 0;
+        const total = subtotal + deliveryFee - discount;
+
+        // 4. Fetch saved addresses
+        const [addresses] = await pool.query(
+            `SELECT * FROM addresses WHERE user_id = ? ORDER BY is_default DESC, created_at DESC`,
+            [userId]
+        );
+
+        // 5. Fetch user verification details
+        const [[user]] = await pool.query(
+            `SELECT is_identity_verified, date_of_birth FROM users WHERE id = ? LIMIT 1`,
+            [userId]
+        );
+
+        // Calculate current age
+        let currentAge = null;
+        let isEligible = true;
+        let ageReason = "";
+
+        if (user.date_of_birth) {
+            const dob = new Date(user.date_of_birth);
+            const diffMs = Date.now() - dob.getTime();
+            const ageDate = new Date(diffMs);
+            currentAge = Math.abs(ageDate.getUTCFullYear() - 1970);
+            
+            if (isAgeRestricted && currentAge < requiredAge) {
+                isEligible = false;
+                ageReason = `underage_${requiredAge}`;
+            }
+        } else if (isAgeRestricted) {
+            isEligible = false;
+            ageReason = "verification_required";
+        }
+
+        res.render("user/checkout", {
+            title: "Checkout - Drinkit",
+            cartItems,
+            subtotal,
+            deliveryFee,
+            discount,
+            total,
+            addresses,
+            user,
+            isAgeRestricted,
+            requiredAge,
+            currentAge,
+            isEligible,
+            ageReason
+        });
+    } catch (error) {
+        console.error("❌ Error loading checkout page:", error);
+        next(error);
+    }
+});
+
+// POST /checkout/address - Adds a new delivery address
+router.post("/checkout/address", ensureAuthenticated, async (req, res) => {
+    const userId = req.session.user.id;
+    const { full_name, mobile, address_line1, address_line2, city, state, pincode, address_type, is_default } = req.body;
+
+    // Validate inputs
+    if (!full_name || !mobile || !address_line1 || !city || !state || !pincode) {
+        return res.status(400).json({ success: false, message: "Please fill in all required fields." });
+    }
+
+    // Pincode validation (6 digits)
+    const pinRegex = /^[1-9][0-9]{5}$/;
+    if (!pinRegex.test(pincode)) {
+        return res.status(400).json({ success: false, message: "Please enter a valid 6-digit PIN code." });
+    }
+
+    // Mobile number validation (10 digits)
+    const mobileRegex = /^[6-9]\d{9}$/;
+    if (!mobileRegex.test(mobile)) {
+        return res.status(400).json({ success: false, message: "Please enter a valid 10-digit mobile number." });
+    }
+
+    const type = address_type || 'home';
+    const isDefault = is_default === '1' || is_default === true ? 1 : 0;
+
+    try {
+        // If set as default, unset previous default addresses
+        if (isDefault) {
+            await pool.query("UPDATE addresses SET is_default = 0 WHERE user_id = ?", [userId]);
+        }
+
+        const [result] = await pool.query(
+            `INSERT INTO addresses (user_id, address_type, full_name, mobile, address_line1, address_line2, city, state, pincode, is_default)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [userId, type, full_name, mobile, address_line1, address_line2 || null, city, state, pincode, isDefault]
+        );
+
+        const newAddressId = result.insertId;
+        const [[newAddress]] = await pool.query("SELECT * FROM addresses WHERE id = ? LIMIT 1", [newAddressId]);
+
+        return res.json({ success: true, message: "Address added successfully.", address: newAddress });
+    } catch (err) {
+        console.error("Error adding address:", err);
+        return res.status(500).json({ success: false, message: "Failed to add address. Please try again." });
+    }
+});
+
+// POST /checkout/verify - Submits identity and DOB details
+router.post("/checkout/verify", ensureAuthenticated, async (req, res) => {
+    const userId = req.session.user.id;
+    const { date_of_birth, doc_type, doc_number, full_name } = req.body;
+
+    if (!date_of_birth || !doc_type || !doc_number || !full_name) {
+        return res.status(400).json({ success: false, message: "All verification details are required." });
+    }
+
+    // Verify format
+    const dobDate = new Date(date_of_birth);
+    if (isNaN(dobDate.getTime())) {
+        return res.status(400).json({ success: false, message: "Invalid date of birth format." });
+    }
+
+    // Calculate age
+    const diffMs = Date.now() - dobDate.getTime();
+    const ageDate = new Date(diffMs);
+    const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+
+    if (age < 18) {
+        return res.status(400).json({ success: false, message: "You must be at least 18 years old to complete identity verification." });
+    }
+
+    try {
+        await pool.query(
+            `UPDATE users 
+             SET date_of_birth = ?, is_identity_verified = 1, identity_verified_at = NOW() 
+             WHERE id = ?`,
+            [date_of_birth, userId]
+        );
+
+        return res.json({ success: true, message: "Identity and age verified successfully." });
+    } catch (err) {
+        console.error("Error verifying identity:", err);
+        return res.status(500).json({ success: false, message: "Verification failed. Please try again." });
+    }
+});
+
+// POST /checkout/create-order - Submits order details and starts transaction
+router.post("/checkout/create-order", ensureAuthenticated, async (req, res) => {
+    const userId = req.session.user.id;
+    const { addressId, paymentMethod, customerNote } = req.body;
+
+    if (!addressId || !paymentMethod) {
+        return res.status(400).json({ success: false, message: "Delivery address and payment method are required." });
+    }
+
+    const conn = await pool.getConnection();
+    try {
+        await conn.beginTransaction();
+
+        // 1. Verify address exists and belongs to user
+        const [addresses] = await conn.query(
+            "SELECT * FROM addresses WHERE id = ? AND user_id = ? LIMIT 1",
+            [addressId, userId]
+        );
+        if (addresses.length === 0) {
+            await conn.rollback();
+            return res.status(400).json({ success: false, message: "Invalid delivery address selected." });
+        }
+
+        // 2. Fetch cart items joining products (to prevent price tampering and verify stock)
+        const [cartItems] = await conn.query(
+            `SELECT ci.quantity, p.id as product_id, p.name, p.price, p.sale_price, p.stock_quantity, p.is_age_restricted,
+                    c.slug as category_slug, p.vendor_id
+             FROM carts ct
+             JOIN cart_items ci ON ct.id = ci.cart_id
+             JOIN products p ON ci.product_id = p.id
+             JOIN categories c ON p.category_id = c.id
+             WHERE ct.user_id = ?`,
+            [userId]
+        );
+
+        if (cartItems.length === 0) {
+            await conn.rollback();
+            return res.status(400).json({ success: false, message: "Your cart is empty." });
+        }
+
+        // 3. Validate stock, calculate totals, check age eligibility
+        let subtotal = 0;
+        let isAgeRestricted = false;
+        let requiredAge = 0;
+
+        for (const item of cartItems) {
+            // Verify stock
+            if (item.stock_quantity < item.quantity) {
+                await conn.rollback();
+                return res.status(400).json({ 
+                    success: false, 
+                    message: `Insufficient stock for product "${item.name}". Available stock: ${item.stock_quantity}.` 
+                });
+            }
+
+            subtotal += item.quantity * item.price;
+
+            if (item.is_age_restricted) {
+                isAgeRestricted = true;
+                if (item.category_slug === "spirits") {
+                    requiredAge = Math.max(requiredAge, 25);
+                } else if (item.category_slug === "beer" || item.category_slug === "wine") {
+                    requiredAge = Math.max(requiredAge, 21);
+                } else {
+                    requiredAge = Math.max(requiredAge, 18);
+                }
+            }
+        }
+
+        // Verify age eligibility in database
+        if (isAgeRestricted) {
+            const [[user]] = await conn.query(
+                "SELECT is_identity_verified, date_of_birth FROM users WHERE id = ? LIMIT 1",
+                [userId]
+            );
+            if (!user.is_identity_verified || !user.date_of_birth) {
+                await conn.rollback();
+                return res.status(400).json({ success: false, message: "Identity and age verification are required for this order." });
+            }
+
+            const dob = new Date(user.date_of_birth);
+            const diffMs = Date.now() - dob.getTime();
+            const ageDate = new Date(diffMs);
+            const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+
+            if (age < requiredAge) {
+                await conn.rollback();
+                return res.status(400).json({ 
+                    success: false, 
+                    message: `You must be at least ${requiredAge} years old to purchase items in this order. Current age: ${age}.` 
+                });
+            }
+        }
+
+        // Recalculate delivery fee and total
+        const deliveryCharge = subtotal > 500 ? 0 : 49;
+        const discountAmount = 0;
+        const taxAmount = 0; // default
+        const totalAmount = subtotal + deliveryCharge + taxAmount - discountAmount;
+
+        // 4. Generate unique order number
+        const orderNumber = "DI" + Date.now() + Math.floor(Math.random() * 1000);
+
+        // 5. Insert into orders table
+        const orderStatus = paymentMethod === 'cod' ? 'confirmed' : 'pending';
+        const paymentStatus = 'pending';
+
+        const [orderResult] = await conn.query(
+            `INSERT INTO orders (order_number, customer_id, address_id, subtotal, discount_amount, delivery_charge, tax_amount, total_amount, payment_status, order_status, customer_note)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [orderNumber, userId, addressId, subtotal, discountAmount, deliveryCharge, taxAmount, totalAmount, paymentStatus, orderStatus, customerNote || null]
+        );
+
+        const orderId = orderResult.insertId;
+
+        // 6. Insert items into order_items (price snapshot) and deduct inventory stock
+        for (const item of cartItems) {
+            const totalPrice = item.quantity * item.price;
+            await conn.query(
+                `INSERT INTO order_items (order_id, product_id, vendor_id, product_name, quantity, unit_price, total_price)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [orderId, item.product_id, item.vendor_id || 1, item.name, item.quantity, item.price, totalPrice]
+            );
+
+            // Deduct stock quantity
+            await conn.query(
+                `UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?`,
+                [item.quantity, item.product_id]
+            );
+        }
+
+        // 7. Insert payment record
+        const payMethodMapped = paymentMethod === 'cod' ? 'cod' : (paymentMethod === 'card' ? 'card' : (paymentMethod === 'upi' ? 'upi' : 'online'));
+        await conn.query(
+            `INSERT INTO payments (order_id, payment_method, transaction_id, amount, status)
+             VALUES (?, ?, ?, ?, ?)`,
+            [orderId, payMethodMapped, paymentMethod === 'cod' ? 'COD-' + orderNumber : null, totalAmount, 'pending']
+        );
+
+        // 8. If COD, clear user's cart immediately
+        if (paymentMethod === 'cod') {
+            const [carts] = await conn.query("SELECT id FROM carts WHERE user_id = ? LIMIT 1", [userId]);
+            if (carts.length > 0) {
+                const cartId = carts[0].id;
+                await conn.query("DELETE FROM cart_items WHERE cart_id = ?", [cartId]);
+                try {
+                    await conn.query("DELETE FROM cart WHERE user_id = ?", [userId]);
+                } catch (flatErr) {}
+            }
+        }
+
+        await conn.commit();
+        conn.release();
+
+        if (paymentMethod === 'cod') {
+            return res.json({ success: true, redirectUrl: `/checkout/success/${orderId}`, paymentMethod: 'cod' });
+        } else {
+            return res.json({ success: true, redirectUrl: `/checkout/payment/${orderId}`, paymentMethod: 'online' });
+        }
+    } catch (err) {
+        await conn.rollback();
+        conn.release();
+        console.error("Error creating order:", err);
+        return res.status(500).json({ success: false, message: "Order creation failed. Please try again." });
+    }
+});
+
+// GET /checkout/payment/:orderId - Renders the payment gateway sandbox
+router.get("/checkout/payment/:orderId", ensureAuthenticated, async (req, res, next) => {
+    const userId = req.session.user.id;
+    const orderId = req.params.orderId;
+
+    try {
+        const [[order]] = await pool.query(
+            `SELECT o.*, p.payment_method 
+             FROM orders o
+             LEFT JOIN payments p ON o.id = p.order_id
+             WHERE o.id = ? AND o.customer_id = ? LIMIT 1`,
+            [orderId, userId]
+        );
+
+        if (!order) {
+            req.flash("error", "Order not found or access denied.");
+            return res.redirect("/cart");
+        }
+
+        if (order.payment_status === "paid") {
+            return res.redirect(`/checkout/success/${orderId}`);
+        }
+
+        res.render("user/payment-sandbox", {
+            title: "Secure Payment Sandbox - Drinkit",
+            order
+        });
+    } catch (err) {
+        console.error("Error loading payment sandbox:", err);
+        next(err);
+    }
+});
+
+// POST /checkout/payment/callback - Completes transaction simulation
+router.post("/checkout/payment/callback", ensureAuthenticated, async (req, res) => {
+    const userId = req.session.user.id;
+    const { orderId, status } = req.body;
+
+    if (!orderId || !status) {
+        return res.status(400).json({ success: false, message: "Invalid parameters." });
+    }
+
+    try {
+        const [[order]] = await pool.query(
+            "SELECT * FROM orders WHERE id = ? AND customer_id = ? LIMIT 1",
+            [orderId, userId]
+        );
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found." });
+        }
+
+        if (status === "success") {
+            // Update order and payment status to successful/paid
+            const transactionId = "TXN-" + Date.now() + Math.floor(Math.random() * 1000);
+            
+            await pool.query(
+                "UPDATE orders SET payment_status = 'paid', order_status = 'confirmed' WHERE id = ?",
+                [orderId]
+            );
+
+            await pool.query(
+                "UPDATE payments SET status = 'success', transaction_id = ?, paid_at = NOW() WHERE order_id = ?",
+                [transactionId, orderId]
+            );
+
+            // Clear user's cart
+            const [carts] = await pool.query("SELECT id FROM carts WHERE user_id = ? LIMIT 1", [userId]);
+            if (carts.length > 0) {
+                const cartId = carts[0].id;
+                await pool.query("DELETE FROM cart_items WHERE cart_id = ?", [cartId]);
+                try {
+                    await pool.query("DELETE FROM cart WHERE user_id = ?", [userId]);
+                } catch (flatErr) {}
+            }
+
+            return res.json({ success: true, redirectUrl: `/checkout/success/${orderId}` });
+        } else {
+            // Update status to failed
+            await pool.query(
+                "UPDATE orders SET payment_status = 'failed', order_status = 'pending' WHERE id = ?",
+                [orderId]
+            );
+
+            await pool.query(
+                "UPDATE payments SET status = 'failed' WHERE order_id = ?",
+                [orderId]
+            );
+
+            // Return stock to inventory since payment failed
+            const [items] = await pool.query("SELECT product_id, quantity FROM order_items WHERE order_id = ?", [orderId]);
+            for (const item of items) {
+                await pool.query("UPDATE products SET stock_quantity = stock_quantity + ? WHERE id = ?", [item.quantity, item.product_id]);
+            }
+
+            req.flash("error", "Online payment simulation failed or was cancelled.");
+            return res.json({ success: true, redirectUrl: "/cart" });
+        }
+    } catch (err) {
+        console.error("Error processing payment callback:", err);
+        return res.status(500).json({ success: false, message: "Failed to process transaction." });
+    }
+});
+
+// GET /checkout/success/:orderId - Renders success page
+router.get("/checkout/success/:orderId", ensureAuthenticated, async (req, res, next) => {
+    const userId = req.session.user.id;
+    const orderId = req.params.orderId;
+
+    try {
+        const [[order]] = await pool.query(
+            `SELECT o.*, a.full_name as address_name, a.address_line1, a.address_line2, a.city, a.state, a.pincode, a.mobile as address_mobile
+             FROM orders o
+             JOIN addresses a ON o.address_id = a.id
+             WHERE o.id = ? AND o.customer_id = ? LIMIT 1`,
+            [orderId, userId]
+        );
+
+        if (!order) {
+            req.flash("error", "Order not found.");
+            return res.redirect("/");
+        }
+
+        res.render("user/success", {
+            title: "Order Placed Successfully! - Drinkit",
+            order
+        });
+    } catch (err) {
+        console.error("Error loading success page:", err);
+        next(err);
+    }
+});
+
+// GET /orders - User's order history
+router.get("/orders", ensureAuthenticated, async (req, res, next) => {
+    const userId = req.session.user.id;
+    try {
+        const [orders] = await pool.query(
+            `SELECT o.*, 
+                    (SELECT COUNT(*) FROM order_items WHERE order_id = o.id) as items_count
+             FROM orders o
+             WHERE o.customer_id = ?
+             ORDER BY o.created_at DESC`,
+            [userId]
+        );
+
+        // Fetch products preview details for each order card
+        for (let order of orders) {
+            const [items] = await pool.query(
+                "SELECT product_name, quantity, unit_price FROM order_items WHERE order_id = ?",
+                [order.id]
+            );
+            order.items = items;
+        }
+
+        res.render("user/orders", {
+            title: "My Orders - Drinkit",
+            orders
+        });
+    } catch (err) {
+        console.error("Error fetching user orders:", err);
+        next(err);
+    }
+});
+
+// GET /orders/:id - Visual status tracker for order
+router.get("/orders/:id", ensureAuthenticated, async (req, res, next) => {
+    const userId = req.session.user.id;
+    const orderId = req.params.id;
+
+    try {
+        const [[order]] = await pool.query(
+            `SELECT o.*, a.full_name as address_name, a.address_line1, a.address_line2, a.city, a.state, a.pincode, a.mobile as address_mobile
+             FROM orders o
+             JOIN addresses a ON o.address_id = a.id
+             WHERE o.id = ? AND o.customer_id = ? LIMIT 1`,
+            [orderId, userId]
+        );
+
+        if (!order) {
+            req.flash("error", "Order not found.");
+            return res.redirect("/orders");
+        }
+
+        const [items] = await pool.query(
+            "SELECT * FROM order_items WHERE order_id = ?",
+            [orderId]
+        );
+
+        res.render("user/order-details", {
+            title: `Order Tracking #${order.order_number} - Drinkit`,
+            order,
+            items
+        });
+    } catch (err) {
+        console.error("Error loading order details:", err);
+        next(err);
     }
 });
 

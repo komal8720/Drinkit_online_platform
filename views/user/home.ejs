@@ -1348,6 +1348,7 @@
 
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="/js/cart-handler.js"></script>
 <script>
 $(document).ready(function() {
     // Generic horizontal slider scroll for all sliders
@@ -1364,59 +1365,6 @@ $(document).ready(function() {
         }
     });
 
-    // AJAX Add to Cart Handler for Home Page
-    $(document).on("click", ".category-add-btn", function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const btn = $(this);
-        const productId = btn.data("product-id");
-        
-        if (!productId) return;
-        
-        btn.prop("disabled", true);
-        
-        fetch("/cart/add", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ productId: productId, quantity: 1 })
-        })
-        .then(res => {
-            if (res.status === 401) {
-                alert("Please login to add items to your cart.");
-                window.location.href = "/auth/login";
-                throw new Error("Unauthorized");
-            }
-            if (!res.ok) {
-                throw new Error("Server error");
-            }
-            return res.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Update cart count in navbar
-                const badge = $(".cart-count");
-                if (badge.length) {
-                    badge.text(data.cartCount);
-                    badge.show();
-                }
-                alert("Product added to cart successfully!");
-            } else {
-                alert(data.message || "Failed to add product to cart.");
-            }
-        })
-        .catch(err => {
-            if (err.message !== "Unauthorized") {
-                console.error("Error adding to cart:", err);
-                alert("Something went wrong. Please try again.");
-            }
-        })
-        .finally(() => {
-            btn.prop("disabled", false);
-        });
-    });
-
     // Wishlist Toggle
     $(document).on("click", ".category-wishlist", function(e) {
         e.preventDefault();
@@ -1431,4 +1379,4 @@ $(document).ready(function() {
 
 </body>
 
-</html>
+</html>/

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/user/home.css">
+    <style>
+        .orders-page-container {
+            padding-top: 40px;
+            padding-bottom: 80px;
+            min-height: 80vh;
+        }
+        .orders-header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--drinkit-text);
+            margin-bottom: 30px;
+        }
+        .orders-header h1 span {
+            color: var(--drinkit-wine);
+        }
+        .order-history-card {
+            background-color: #ffffff;
+            border: 1px solid var(--drinkit-border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+            transition: transform 0.2s;
+        }
+        .order-history-card:hover {
+            transform: translateY(-2px);
+        }
+        .order-meta-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--drinkit-border);
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .btn-track {
+            background-color: var(--drinkit-wine);
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 8px;
+            padding: 8px 16px;
+            border: none;
+            font-size: 13px;
+            text-decoration: none;
+            transition: 0.2s;
+            display: inline-block;
+        }
+        .btn-track:hover {
+            background-color: var(--drinkit-wine-dark);
+            color: #ffffff;
+        }
+        .status-badge {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 6px 12px;
+            border-radius: 50px;
+            text-transform: uppercase;
+        }
+        .status-pending { background-color: #fef3c7; color: #d97706; }
+        .status-confirmed { background-color: #d1e7dd; color: #0f5132; }
+        .status-preparing { background-color: #cfe2ff; color: #084298; }
+        .status-delivery { background-color: #e0cffc; color: #59359a; }
+        .status-delivered { background-color: #d1e7dd; color: #0f5132; }
+        .status-cancelled { background-color: #f8d7da; color: #842029; }
+        .empty-orders-card {
+            text-align: center;
+            background-color: #ffffff;
+            border: 1px solid var(--drinkit-border);
+            border-radius: 20px;
+            padding: 60px 40px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.01);
+            max-width: 550px;
+            margin: 40px auto;
+        }
+    </style>
+</head>
+<body>
+
+<%- include('../partials/navbar') %>
+
+<div class="container orders-page-container">
+    
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb" style="background: transparent; padding: 0;">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted" style="font-weight: 600;"><i class="bi bi-house-door-fill me-1"></i>Home</a></li>
+            <li class="breadcrumb-item active text-dark" aria-current="page" style="font-weight: 700;">My Orders</li>
+        </ol>
+    </nav>
+
+    <div class="orders-header">
+        <h1>My Order <span>History</span></h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            
+            <% if (orders && orders.length > 0) { %>
+                <% orders.forEach(order => { %>
+                    <div class="order-history-card">
+                        
+                        <!-- Header metadata -->
+                        <div class="order-meta-header">
+                            <div>
+                                <span class="fw-bold text-dark me-2">#<%= order.order_number %></span>
+                                <span class="text-muted small"><%= new Date(order.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) %></span>
+                            </div>
+                            <div>
+                                <!-- Order status badge -->
+                                <% if (order.order_status === 'pending') { %>
+                                    <span class="status-badge status-pending">Pending Payment</span>
+                                <% } else if (order.order_status === 'confirmed') { %>
+                                    <span class="status-badge status-confirmed">Confirmed</span>
+                                <% } else if (order.order_status === 'preparing') { %>
+                                    <span class="status-badge status-preparing">Preparing</span>
+                                <% } else if (order.order_status === 'out_for_delivery') { %>
+                                    <span class="status-badge status-delivery">Out for Delivery</span>
+                                <% } else if (order.order_status === 'delivered') { %>
+                                    <span class="status-badge status-delivered">Delivered</span>
+                                <% } else if (order.order_status === 'cancelled' || order.order_status === 'rejected') { %>
+                                    <span class="status-badge status-cancelled">Cancelled</span>
+                                <% } else { %>
+                                    <span class="status-badge status-preparing"><%= order.order_status %></span>
+                                <% } %>
+
+                                <!-- Payment status badge -->
+                                <span class="status-badge ms-1 <%= order.payment_status === 'paid' ? 'status-confirmed' : 'status-pending' %>">
+                                    <%= order.payment_status === 'paid' ? 'Paid' : 'Unpaid' %>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Card details summary -->
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div class="small text-muted">
+                                <p class="mb-1 fw-bold text-dark"><%= order.items_count %> item(s)</p>
+                                <p class="mb-0">Total amount paid: <strong class="text-dark">₹<%= parseInt(order.total_amount) %></strong></p>
+                            </div>
+                            <div>
+                                <a href="/orders/<%= order.id %>" class="btn-track">
+                                    <i class="bi bi-geo-alt-fill me-1"></i> Details & Tracking
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Product Preview List -->
+                        <% if (order.items && order.items.length > 0) { %>
+                            <div class="mt-3 pt-3 border-top">
+                                <small class="text-muted d-block mb-2" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Items Preview</small>
+                                <ul class="list-unstyled mb-0">
+                                    <% order.items.forEach(item => { %>
+                                        <li class="d-flex justify-content-between align-items-center mb-1" style="font-size: 13px;">
+                                            <span class="text-dark"><%= item.product_name %> <span class="text-muted">× <%= item.quantity %></span></span>
+                                            <span class="fw-bold">₹<%= parseInt(item.unit_price * item.quantity) %></span>
+                                        </li>
+                                    <% }) %>
+                                </ul>
+                            </div>
+                        <% } %>
+
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <!-- Empty state -->
+                <div class="empty-orders-card">
+                    <i class="bi bi-receipt empty-cart-icon"></i>
+                    <h3>No orders yet</h3>
+                    <p>You haven't placed any orders yet.</p>
+                    <a href="/products" class="btn btn-drinkit-wine px-4 py-2" style="border-radius: 8px;">Start Shopping</a>
+                </div>
+            <% } %>
+
+        </div>
+    </div>
+
+</div>
+
+<%- include('../partials/footer') %>
+
+</body>
+</html>

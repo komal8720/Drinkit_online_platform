@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/user/home.css">
+    <style>
+        .details-page-container {
+            padding-top: 40px;
+            padding-bottom: 80px;
+            min-height: 80vh;
+        }
+        .details-header h1 {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--drinkit-text);
+            margin-bottom: 30px;
+        }
+        .details-header h1 span {
+            color: var(--drinkit-wine);
+        }
+        .details-card {
+            background-color: #ffffff;
+            border: 1px solid var(--drinkit-border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+        }
+        /* Vertical Status Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            list-style: none;
+            margin-top: 20px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 9px;
+            height: 90%;
+            width: 3px;
+            background-color: #e9ecef;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 4px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            border: 3px solid #fff;
+            box-shadow: 0 0 0 3px #e9ecef;
+        }
+        .timeline-item.completed::before {
+            background-color: #198754;
+            box-shadow: 0 0 0 3px #198754;
+        }
+        .timeline-item.active::before {
+            background-color: var(--drinkit-wine);
+            box-shadow: 0 0 0 3px var(--drinkit-wine);
+        }
+        .timeline-item-title {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 2px;
+            color: var(--drinkit-muted);
+        }
+        .timeline-item.completed .timeline-item-title {
+            color: #198754;
+        }
+        .timeline-item.active .timeline-item-title {
+            color: var(--drinkit-wine);
+            font-size: 15px;
+        }
+        .timeline-item-desc {
+            font-size: 12px;
+            color: var(--drinkit-muted);
+        }
+        .timeline-item.completed .timeline-item-desc {
+            color: #212529;
+        }
+        .timeline-item.active .timeline-item-desc {
+            color: #212529;
+            font-weight: 600;
+        }
+        .details-table th {
+            font-weight: 700;
+            color: var(--drinkit-muted);
+        }
+        .details-table td {
+            font-weight: 600;
+            color: var(--drinkit-text);
+        }
+    </style>
+</head>
+<body>
+
+<%- include('../partials/navbar') %>
+
+<div class="container details-page-container">
+    
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb" style="background: transparent; padding: 0;">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted" style="font-weight: 600;"><i class="bi bi-house-door-fill me-1"></i>Home</a></li>
+            <li class="breadcrumb-item"><a href="/orders" class="text-decoration-none text-muted" style="font-weight: 600;">My Orders</a></li>
+            <li class="breadcrumb-item active text-dark" aria-current="page" style="font-weight: 700;">Order Details</li>
+        </ol>
+    </nav>
+
+    <div class="details-header">
+        <h1>Order Tracking <span>#<%= order.order_number %></span></h1>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left: Status Tracker Timeline -->
+        <div class="col-md-5">
+            <div class="details-card">
+                <h4 class="fw-bold mb-3 text-dark"><i class="bi bi-compass-fill text-wine me-1"></i> Delivery Progress</h4>
+                
+                <% if (order.order_status === 'cancelled' || order.order_status === 'rejected') { %>
+                    <div class="alert alert-danger mb-0">
+                        <h5 class="alert-heading fw-bold small"><i class="bi bi-x-circle-fill me-1"></i> Order Cancelled</h5>
+                        <p class="mb-0 small">This order has been cancelled or rejected. No further progress will be made.</p>
+                    </div>
+                <% } else { %>
+                    <ul class="timeline">
+                        <!-- Step 1: Confirmed -->
+                        <% 
+                            const statuses = ['pending', 'confirmed', 'preparing', 'ready_for_pickup', 'picked_up', 'out_for_delivery', 'delivered'];
+                            const curIdx = statuses.indexOf(order.order_status);
+                            
+                            function getStepClass(stepStatusIndex) {
+                                if (curIdx >= stepStatusIndex && order.order_status === statuses[stepStatusIndex]) {
+                                    return 'active';
+                                } else if (curIdx >= stepStatusIndex) {
+                                    return 'completed';
+                                }
+                                return '';
+                            }
+                        %>
+                        <li class="timeline-item <%= getStepClass(1) %>">
+                            <div class="timeline-item-title">Order Confirmed</div>
+                            <div class="timeline-item-desc">Your order has been validated and accepted by the vendor.</div>
+                        </li>
+                        
+                        <!-- Step 2: Preparing -->
+                        <li class="timeline-item <%= (order.order_status === 'preparing' || order.order_status === 'ready_for_pickup') ? 'active' : (curIdx > 3 ? 'completed' : '') %>">
+                            <div class="timeline-item-title">Preparing Order</div>
+                            <div class="timeline-item-desc">The vendor is packaging and chilling your items.</div>
+                        </li>
+
+                        <!-- Step 3: Partner Assigned -->
+                        <li class="timeline-item <%= order.order_status === 'picked_up' ? 'active' : (curIdx > 4 ? 'completed' : '') %>">
+                            <div class="timeline-item-title">Delivery Partner Assigned</div>
+                            <div class="timeline-item-desc">A delivery executive is picking up your package.</div>
+                        </li>
+
+                        <!-- Step 4: Out for Delivery -->
+                        <li class="timeline-item <%= getStepClass(5) %>">
+                            <div class="timeline-item-title">Out for Delivery</div>
+                            <div class="timeline-item-desc">Our partner is on the way to your delivery address.</div>
+                        </li>
+
+                        <!-- Step 5: Delivered -->
+                        <li class="timeline-item <%= getStepClass(6) %>">
+                            <div class="timeline-item-title">Delivered</div>
+                            <div class="timeline-item-desc">Enjoy your drinks! Thank you for ordering from Drinkit.</div>
+                        </li>
+                    </ul>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Right: Items Summary & Delivery Address Details -->
+        <div class="col-md-7">
+            
+            <!-- Items Detail -->
+            <div class="details-card">
+                <h4 class="fw-bold mb-3 text-dark"><i class="bi bi-receipt-cutoff text-wine me-1"></i> Order Items</h4>
+                <div class="table-responsive">
+                    <table class="table details-table align-middle">
+                        <thead>
+                            <tr class="table-light">
+                                <th style="width: 50%;">Product</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% items.forEach(item => { %>
+                                <tr>
+                                    <td>
+                                        <span class="d-block fw-bold text-dark"><%= item.product_name %></span>
+                                    </td>
+                                    <td class="text-center"><%= item.quantity %></td>
+                                    <td class="text-end">₹<%= parseInt(item.total_price) %></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2" class="text-end text-muted small">Subtotal:</td>
+                                <td class="text-end small">₹<%= parseInt(order.subtotal) %></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="text-end text-muted small">Delivery Charges:</td>
+                                <td class="text-end small">
+                                    <%= order.delivery_charge === 0 ? "FREE" : "₹" + parseInt(order.delivery_charge) %>
+                                </td>
+                            </tr>
+                            <tr class="table-light">
+                                <td colspan="2" class="text-end fw-bold text-dark">Total Paid:</td>
+                                <td class="text-end fw-bold text-wine">₹<%= parseInt(order.total_amount) %></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Delivery Address -->
+            <div class="details-card">
+                <h4 class="fw-bold mb-3 text-dark"><i class="bi bi-geo-alt-fill text-wine me-1"></i> Delivery Details</h4>
+                <p class="mb-1 fw-bold text-dark"><%= order.address_name %></p>
+                <p class="mb-2 text-muted small" style="line-height: 1.4;">
+                    <%= order.address_line1 %><br>
+                    <%= order.address_line2 ? order.address_line2 + ', ' : '' %><%= order.city %>, <%= order.state %> - <%= order.pincode %>
+                </p>
+                <p class="mb-0 small fw-bold text-dark"><i class="bi bi-telephone-fill me-1"></i><%= order.address_mobile %></p>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<%- include('../partials/footer') %>
+
+</body>
+</html>

@@ -340,7 +340,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
+<script src="/js/cart-handler.js"></script>
 <script>
 $(document).ready(function() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -395,59 +395,6 @@ $(document).ready(function() {
         icon.toggleClass("bi-heart");
         icon.toggleClass("bi-heart-fill");
         $(this).toggleClass("active");
-    });
-
-    // AJAX Add to Cart Handler
-    $(".add-cart-btn").on("click", function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const btn = $(this);
-        const productId = btn.data("product-id");
-        
-        if (!productId) return;
-        
-        btn.prop("disabled", true);
-        
-        fetch("/cart/add", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ productId: productId, quantity: 1 })
-        })
-        .then(res => {
-            if (res.status === 401) {
-                alert("Please login to add items to your cart.");
-                window.location.href = "/auth/login";
-                throw new Error("Unauthorized");
-            }
-            if (!res.ok) {
-                throw new Error("Server error");
-            }
-            return res.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Update cart count in navbar
-                const badge = $(".cart-count");
-                if (badge.length) {
-                    badge.text(data.cartCount);
-                    badge.show();
-                }
-                alert("Product added to cart successfully!");
-            } else {
-                alert(data.message || "Failed to add product to cart.");
-            }
-        })
-        .catch(err => {
-            if (err.message !== "Unauthorized") {
-                console.error("Error adding to cart:", err);
-                alert("Something went wrong. Please try again.");
-            }
-        })
-        .finally(() => {
-            btn.prop("disabled", false);
-        });
     });
 });
 </script>

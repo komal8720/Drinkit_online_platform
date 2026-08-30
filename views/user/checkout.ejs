@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="<%= langCode %>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Home CSS -->
+    <link rel="stylesheet" href="/css/user/home.css">
+    <style>
+        .checkout-container {
+            padding-top: 40px;
+            padding-bottom: 80px;
+            min-height: 80vh;
+        }
+        .checkout-title h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--drinkit-text);
+            margin-bottom: 30px;
+        }
+        .checkout-title h1 span {
+            color: var(--drinkit-wine);
+        }
+        .checkout-section-card {
+            background: #ffffff;
+            border: 1px solid var(--drinkit-border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--drinkit-border);
+            padding-bottom: 10px;
+        }
+        .section-header h2 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--drinkit-text);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-header h2 i {
+            color: var(--drinkit-wine);
+        }
+        .address-card {
+            border: 2px solid var(--drinkit-border);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .address-card.selected {
+            border-color: var(--drinkit-wine);
+            background-color: var(--drinkit-wine-light);
+        }
+        .address-card-radio {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+        }
+        .btn-drinkit-wine {
+            background-color: var(--drinkit-wine);
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 10px;
+            padding: 10px 20px;
+            border: none;
+            transition: 0.2s;
+        }
+        .btn-drinkit-wine:hover {
+            background-color: var(--drinkit-wine-dark);
+            color: #ffffff;
+        }
+        .btn-drinkit-outline {
+            background-color: transparent;
+            color: var(--drinkit-wine);
+            border: 1px solid var(--drinkit-wine);
+            font-weight: 700;
+            border-radius: 10px;
+            padding: 10px 20px;
+            transition: 0.2s;
+        }
+        .btn-drinkit-outline:hover {
+            background-color: var(--drinkit-wine-light);
+            color: var(--drinkit-wine);
+        }
+        .payment-option-card {
+            border: 2px solid var(--drinkit-border);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .payment-option-card:hover {
+            border-color: var(--drinkit-wine);
+        }
+        .payment-option-card.selected {
+            border-color: var(--drinkit-wine);
+            background-color: var(--drinkit-wine-light);
+        }
+        .checkout-summary-card {
+            background: #ffffff;
+            border: 1px solid var(--drinkit-border);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.01);
+            position: sticky;
+            top: 20px;
+        }
+        .summary-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--drinkit-text);
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--drinkit-border);
+            padding-bottom: 12px;
+        }
+        .summary-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--drinkit-text);
+            margin-bottom: 12px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--drinkit-muted);
+        }
+        .summary-row.total-row {
+            border-top: 1px dashed var(--drinkit-border);
+            padding-top: 15px;
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--drinkit-text);
+        }
+        .summary-row.total-row .total-price {
+            color: var(--drinkit-wine);
+        }
+        .btn-place-order {
+            background: var(--drinkit-wine);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 16px;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            width: 100%;
+            transition: 0.2s ease;
+            margin-top: 20px;
+        }
+        .btn-place-order:hover:not(:disabled) {
+            background: var(--drinkit-wine-dark);
+            color: #ffffff;
+        }
+        .btn-place-order:disabled {
+            background: #dcd7d8;
+            color: #888082;
+            cursor: not-allowed;
+        }
+        .alert-eligibility {
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<%- include('../partials/navbar') %>
+
+<div class="container checkout-container">
+    
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb" style="background: transparent; padding: 0;">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted" style="font-weight: 600;"><i class="bi bi-house-door-fill me-1"></i>Home</a></li>
+            <li class="breadcrumb-item"><a href="/cart" class="text-decoration-none text-muted" style="font-weight: 600;">Cart</a></li>
+            <li class="breadcrumb-item active text-dark" aria-current="page" style="font-weight: 700;">Checkout</li>
+        </ol>
+    </nav>
+
+    <div class="checkout-title">
+        <h1>Secure <span>Checkout</span></h1>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Column: Checkout Sections -->
+        <div class="col-lg-8">
+            
+            <!-- 1. Delivery Address -->
+            <div class="checkout-section-card">
+                <div class="section-header">
+                    <h2><i class="bi bi-geo-alt-fill"></i> 1. Delivery Address</h2>
+                    <button class="btn btn-sm btn-drinkit-outline" id="btnShowAddAddress">
+                        <i class="bi bi-plus-lg me-1"></i> Add New Address
+                    </button>
+                </div>
+
+                <div class="row g-3" id="addressListContainer">
+                    <% if (addresses && addresses.length > 0) { %>
+                        <% addresses.forEach((addr, idx) => { %>
+                            <div class="col-md-6">
+                                <div class="address-card <%= idx === 0 ? 'selected' : '' %>" data-address-id="<%= addr.id %>">
+                                    <input type="radio" name="selected_address" value="<%= addr.id %>" class="address-card-radio" <%= idx === 0 ? 'checked' : '' %>>
+                                    <h5 class="fw-bold mb-1 text-capitalize"><%= addr.address_type %></h5>
+                                    <p class="mb-1 fw-semibold text-dark"><%= addr.full_name %></p>
+                                    <p class="mb-2 text-muted small" style="line-height: 1.4;">
+                                        <%= addr.address_line1 %><br>
+                                        <%= addr.address_line2 ? addr.address_line2 + ', ' : '' %><%= addr.city %>, <%= addr.state %> - <%= addr.pincode %>
+                                    </p>
+                                    <p class="mb-0 small fw-bold text-dark"><i class="bi bi-telephone-fill me-1"></i><%= addr.mobile %></p>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="col-12 text-center py-4">
+                            <i class="bi bi-house-dash-fill fs-2 text-muted mb-2 d-block"></i>
+                            <p class="text-muted fw-semibold">No addresses saved yet. Please add a delivery address to proceed.</p>
+                            <button class="btn btn-drinkit-wine mt-2" id="btnNoAddressAdd">
+                                <i class="bi bi-plus-lg me-1"></i> Add Delivery Address
+                            </button>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- 2. Delivery Information -->
+            <div class="checkout-section-card">
+                <div class="section-header">
+                    <h2><i class="bi bi-truck"></i> 2. Delivery Information</h2>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="fs-2 text-success"><i class="bi bi-lightning-charge-fill"></i></div>
+                    <div>
+                        <p class="mb-1 fw-bold text-dark">Instant Delivery in approximately 30 minutes</p>
+                        <p class="mb-0 text-muted small">
+                            Delivering to current location: <strong><%= selectedLocation %></strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Age / Identity Eligibility -->
+            <div class="checkout-section-card">
+                <div class="section-header">
+                    <h2><i class="bi bi-shield-check"></i> 3. Age & Identity Verification</h2>
+                </div>
+
+                <% if (isAgeRestricted) { %>
+                    <% if (user.is_identity_verified) { %>
+                        <div class="alert alert-success alert-eligibility mb-0">
+                            <div class="d-flex gap-2">
+                                <i class="bi bi-check-circle-fill fs-5"></i>
+                                <div>
+                                    <p class="mb-1 fw-bold">Identity & Age Verified</p>
+                                    <ul class="mb-0 ps-3 small">
+                                        <li>Verified Full Name & DOB</li>
+                                        <li>Current verified age: <strong><%= currentAge %> years</strong></li>
+                                        <% if (isEligible) { %>
+                                            <li class="text-success fw-bold">✓ Eligible to purchase age-restricted beverages in this cart.</li>
+                                        <% } else { %>
+                                            <li class="text-danger fw-bold">✗ Not eligible: Minimum legal age for this order is <%= requiredAge %> years (Maharashta Excise Law).</li>
+                                        <% } %>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <div class="alert alert-warning alert-eligibility mb-3">
+                            <div class="d-flex gap-2">
+                                <i class="bi bi-lock-fill fs-5"></i>
+                                <div>
+                                    <p class="mb-1 fw-bold">Age Verification Required</p>
+                                    <p class="mb-0 small">This order contains age-restricted alcoholic products. Please complete a one-time identity verification (minimum legal age: <%= requiredAge %> years) to proceed.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-drinkit-wine" id="btnStartVerification">
+                            <i class="bi bi-shield-lock-fill me-1"></i> Verify Now
+                        </button>
+                    <% } %>
+                <% } else { %>
+                    <div class="alert alert-light alert-eligibility border mb-0 text-muted">
+                        <i class="bi bi-info-circle-fill me-1"></i> Age verification is not required for this order (contains only non-alcoholic products).
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- 4. Payment Method -->
+            <div class="checkout-section-card">
+                <div class="section-header">
+                    <h2><i class="bi bi-credit-card-2-front-fill"></i> 4. Payment Method</h2>
+                </div>
+
+                <div class="payment-option-card selected" data-payment="cod">
+                    <input type="radio" name="payment_method_input" value="cod" checked>
+                    <div>
+                        <p class="mb-0 fw-bold text-dark">Cash on Delivery (COD)</p>
+                        <small class="text-muted">Pay at your doorstep with Cash or UPI scanner</small>
+                    </div>
+                </div>
+
+                <div class="payment-option-card" data-payment="upi">
+                    <input type="radio" name="payment_method_input" value="upi">
+                    <div>
+                        <p class="mb-0 fw-bold text-dark">Instant UPI (Simulation)</p>
+                        <small class="text-muted">Pay instantly using Google Pay, PhonePe, or Paytm</small>
+                    </div>
+                </div>
+
+                <div class="payment-option-card" data-payment="card">
+                    <input type="radio" name="payment_method_input" value="card">
+                    <div>
+                        <p class="mb-0 fw-bold text-dark">Credit / Debit Card (Simulation)</p>
+                        <small class="text-muted">Pay securely using Visa, Mastercard, or RuPay</small>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Order Summary & Place Order -->
+        <div class="col-lg-4">
+            <div class="checkout-summary-card">
+                <h2 class="summary-title">Order Summary</h2>
+
+                <!-- Items List -->
+                <div class="mb-4 pb-3 border-bottom">
+                    <% cartItems.forEach(item => { %>
+                        <div class="summary-item-row">
+                            <div style="max-width: 70%;">
+                                <span class="d-block fw-bold text-dark text-truncate"><%= item.name %></span>
+                                <small class="text-muted"><%= item.bottle_size %> × <%= item.quantity %></small>
+                            </div>
+                            <span class="fw-bold">₹<%= parseInt(item.product_price * item.quantity) %></span>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <!-- Totals -->
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>₹<%= parseInt(subtotal) %></span>
+                </div>
+                
+                <div class="summary-row">
+                    <span>Delivery Charges</span>
+                    <span><%= deliveryFee === 0 ? "FREE" : "₹" + parseInt(deliveryFee) %></span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Discount</span>
+                    <span>₹<%= parseInt(discount) %></span>
+                </div>
+
+                <div class="summary-row total-row">
+                    <span>Total to Pay</span>
+                    <span class="total-price" id="checkoutTotalText">₹<%= parseInt(total) %></span>
+                </div>
+
+                <!-- Error Messages container -->
+                <div id="checkoutErrorContainer" class="mt-3">
+                    <% if (isAgeRestricted && !user.is_identity_verified) { %>
+                        <div class="alert alert-danger p-2 small mb-0" style="font-size: 11px;"><i class="bi bi-exclamation-triangle-fill me-1"></i> Identity verification is required.</div>
+                    <% } else if (isAgeRestricted && !isEligible) { %>
+                        <div class="alert alert-danger p-2 small mb-0" style="font-size: 11px;"><i class="bi bi-exclamation-triangle-fill me-1"></i> Underage: Not eligible to purchase restricted items.</div>
+                    <% } %>
+                </div>
+
+                <!-- Place Order Button -->
+                <button class="btn-place-order" id="btnPlaceOrder" 
+                    <%= (addresses.length === 0 || (isAgeRestricted && (!user.is_identity_verified || !isEligible))) ? 'disabled' : '' %>>
+                    Place Order (COD) <i class="bi bi-arrow-right ms-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL: Add New Address -->
+<div class="modal fade" id="modalAddAddress" tabindex="-1" aria-labelledby="modalAddAddressLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold fs-5" id="modalAddAddressLabel">Add Delivery Address</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formAddAddress">
+                <div class="modal-body py-4">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Full Name</label>
+                            <input type="text" name="full_name" class="form-control form-control-sm" required style="border-radius: 8px;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Mobile Number</label>
+                            <input type="tel" name="mobile" class="form-control form-control-sm" required placeholder="10-digit number" style="border-radius: 8px;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">PIN Code</label>
+                            <input type="text" name="pincode" class="form-control form-control-sm" required placeholder="6-digit PIN" style="border-radius: 8px;">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Flat / House No. / Building</label>
+                            <input type="text" name="address_line1" class="form-control form-control-sm" required style="border-radius: 8px;">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Street Name / Area / Colony</label>
+                            <input type="text" name="address_line2" class="form-control form-control-sm" placeholder="Optional" style="border-radius: 8px;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">City</label>
+                            <input type="text" name="city" class="form-control form-control-sm" required style="border-radius: 8px;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">State</label>
+                            <input type="text" name="state" class="form-control form-control-sm" required style="border-radius: 8px;">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Address Type</label>
+                            <div class="d-flex gap-3">
+                                <label class="small fw-semibold"><input type="radio" name="address_type" value="home" checked class="me-1"> Home</label>
+                                <label class="small fw-semibold"><input type="radio" name="address_type" value="work" class="me-1"> Work</label>
+                                <label class="small fw-semibold"><input type="radio" name="address_type" value="other" class="me-1"> Other</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="small fw-semibold"><input type="checkbox" name="is_default" value="1" checked class="me-1"> Set as default delivery address</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-drinkit-wine" style="border-radius: 8px;">Save Address</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Age Verification -->
+<div class="modal fade" id="modalVerifyAge" tabindex="-1" aria-labelledby="modalVerifyAgeLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold fs-5" id="modalVerifyAgeLabel">Age & Identity Verification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formVerifyAge">
+                <div class="modal-body py-4">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Full Name (as per document)</label>
+                            <input type="text" name="full_name" class="form-control form-control-sm" required style="border-radius: 8px;">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Date of Birth</label>
+                            <input type="date" name="date_of_birth" class="form-control form-control-sm" required style="border-radius: 8px;">
+                            <small class="text-muted d-block mt-1">Must match legal birth date records.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Document Type</label>
+                            <select name="doc_type" class="form-select form-select-sm" required style="border-radius: 8px;">
+                                <option value="aadhaar">Aadhaar Card</option>
+                                <option value="pan">PAN Card</option>
+                                <option value="license">Driving License</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Document Number</label>
+                            <input type="password" name="doc_number" class="form-control form-control-sm" required placeholder="Last 4 digits only" maxlength="4" style="border-radius: 8px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-drinkit-wine" style="border-radius: 8px;">Complete Verification</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+
+<!-- Bootstrap Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    
+    let selectedAddressId = null;
+    let selectedPaymentMethod = 'cod';
+    
+    const isAgeRestricted = <%= isAgeRestricted %>;
+    let isEligible = <%= isEligible %>;
+    let userVerified = <%= user.is_identity_verified ? 'true' : 'false' %>;
+
+    // Set initial selected address if elements exist
+    const selectedRadio = $('input[name="selected_address"]:checked');
+    if (selectedRadio.length) {
+        selectedAddressId = selectedRadio.val();
+    }
+
+    // Handle address card click
+    $(document).on("click", ".address-card", function() {
+        $(".address-card").removeClass("selected");
+        $(this).addClass("selected");
+        
+        const radio = $(this).find('input[name="selected_address"]');
+        radio.prop("checked", true);
+        selectedAddressId = radio.val();
+        validateFormState();
+    });
+
+    // Handle payment option click
+    $(".payment-option-card").on("click", function() {
+        $(".payment-option-card").removeClass("selected");
+        $(this).addClass("selected");
+        
+        const radio = $(this).find('input[name="payment_method_input"]');
+        radio.prop("checked", true);
+        selectedPaymentMethod = radio.val();
+        
+        // Update Place Order button text
+        const btn = $("#btnPlaceOrder");
+        if (selectedPaymentMethod === 'cod') {
+            btn.html('Place Order (COD) <i class="bi bi-arrow-right ms-1"></i>');
+        } else {
+            btn.html('Proceed to Payment <i class="bi bi-credit-card-2-front-fill ms-1"></i>');
+        }
+        
+        validateFormState();
+    });
+
+    // Show Modals
+    $("#btnShowAddAddress, #btnNoAddressAdd").on("click", function(e) {
+        e.preventDefault();
+        const modal = new bootstrap.Modal(document.getElementById('modalAddAddress'));
+        modal.show();
+    });
+
+    $("#btnStartVerification").on("click", function(e) {
+        e.preventDefault();
+        const modal = new bootstrap.Modal(document.getElementById('modalVerifyAge'));
+        modal.show();
+    });
+
+    // Submit Add Address Form via AJAX
+    $("#formAddAddress").on("submit", function(e) {
+        e.preventDefault();
+        const formData = {
+            full_name: $(this).find('input[name="full_name"]').val(),
+            mobile: $(this).find('input[name="mobile"]').val(),
+            pincode: $(this).find('input[name="pincode"]').val(),
+            address_line1: $(this).find('input[name="address_line1"]').val(),
+            address_line2: $(this).find('input[name="address_line2"]').val(),
+            city: $(this).find('input[name="city"]').val(),
+            state: $(this).find('input[name="state"]').val(),
+            address_type: $(this).find('input[name="address_type"]:checked').val(),
+            is_default: $(this).find('input[name="is_default"]').is(':checked') ? 1 : 0
+        };
+
+        $.ajax({
+            url: "/checkout/address",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(formData),
+            success: function(data) {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalAddAddress')).hide();
+                    location.reload(); // Reload page to fetch updated address list
+                } else {
+                    alert(data.message || "Failed to add address.");
+                }
+            },
+            error: function(xhr) {
+                alert(xhr.responseJSON?.message || "Failed to submit address. Verify parameters and try again.");
+            }
+        });
+    });
+
+    // Submit Verification Form via AJAX
+    $("#formVerifyAge").on("submit", function(e) {
+        e.preventDefault();
+        const formData = {
+            full_name: $(this).find('input[name="full_name"]').val(),
+            date_of_birth: $(this).find('input[name="date_of_birth"]').val(),
+            doc_type: $(this).find('select[name="doc_type"]').val(),
+            doc_number: $(this).find('input[name="doc_number"]').val()
+        };
+
+        $.ajax({
+            url: "/checkout/verify",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(formData),
+            success: function(data) {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalVerifyAge')).hide();
+                    location.reload(); // Reload to update age eligibility status
+                } else {
+                    alert(data.message || "Verification failed.");
+                }
+            },
+            error: function(xhr) {
+                alert(xhr.responseJSON?.message || "Failed to complete verification. Please try again.");
+            }
+        });
+    });
+
+    // Form validation check helper
+    function validateFormState() {
+        const btn = $("#btnPlaceOrder");
+        const errContainer = $("#checkoutErrorContainer");
+        errContainer.empty();
+        
+        let valid = true;
+
+        if (!selectedAddressId) {
+            valid = false;
+            errContainer.append('<div class="alert alert-danger p-2 small mb-2" style="font-size: 11px;"><i class="bi bi-exclamation-triangle-fill me-1"></i> Delivery address is required.</div>');
+        }
+
+        if (isAgeRestricted) {
+            if (!userVerified) {
+                valid = false;
+                errContainer.append('<div class="alert alert-danger p-2 small mb-2" style="font-size: 11px;"><i class="bi bi-lock-fill me-1"></i> Age & Identity verification is required.</div>');
+            } else if (!isEligible) {
+                valid = false;
+                errContainer.append('<div class="alert alert-danger p-2 small mb-2" style="font-size: 11px;"><i class="bi bi-exclamation-triangle-fill me-1"></i> Age restriction check failed: You are underage for items in this cart.</div>');
+            }
+        }
+
+        btn.prop("disabled", !valid);
+    }
+
+    // Submit final order creation
+    $("#btnPlaceOrder").on("click", function(e) {
+        e.preventDefault();
+        
+        if (!selectedAddressId || !selectedPaymentMethod) return;
+
+        // Double submission prevention
+        const btn = $(this);
+        btn.prop("disabled", true);
+        btn.text("Processing Order...");
+
+        const orderData = {
+            addressId: selectedAddressId,
+            paymentMethod: selectedPaymentMethod,
+            customerNote: ""
+        };
+
+        $.ajax({
+            url: "/checkout/create-order",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(orderData),
+            success: function(data) {
+                if (data.success && data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                } else {
+                    const errContainer = $("#checkoutErrorContainer");
+                    errContainer.empty().append('<div class="alert alert-danger p-2 small mb-2" style="font-size: 11px;"><i class="bi bi-exclamation-triangle-fill me-1"></i> ' + (data.message || "Order placement failed.") + '</div>');
+                    btn.prop("disabled", false);
+                    btn.html(selectedPaymentMethod === 'cod' ? 'Place Order (COD) <i class="bi bi-arrow-right ms-1"></i>' : 'Proceed to Payment <i class="bi bi-credit-card-2-front-fill ms-1"></i>');
+                }
+            },
+            error: function(xhr) {
+                const errMsg = xhr.responseJSON?.message || "Failed to place order. Verify parameters and try again.";
+                const errContainer = $("#checkoutErrorContainer");
+                errContainer.empty().append('<div class="alert alert-danger p-2 small mb-2" style="font-size: 11px;"><i class="bi bi-exclamation-triangle-fill me-1"></i> ' + errMsg + '</div>');
+                btn.prop("disabled", false);
+                btn.html(selectedPaymentMethod === 'cod' ? 'Place Order (COD) <i class="bi bi-arrow-right ms-1"></i>' : 'Proceed to Payment <i class="bi bi-credit-card-2-front-fill ms-1"></i>');
+            }
+        });
+    });
+
+    // Initial validation check
+    validateFormState();
+
+});
+</script>
+</body>
+</html>
