@@ -5,6 +5,7 @@
 const express = require("express");
 const { ensureAuthenticated } = require("../middleware/auth");
 const { pool } = require("../config/db");
+const upload = require("../middleware/upload");
 
 const router = express.Router();
 
@@ -171,10 +172,156 @@ router.post("/set-location", (req, res) => {
 // PROFILE
 // ==========================================================
 
-router.get("/profile", ensureAuthenticated, (req, res) => {
-    res.render("user/profile", {
-        title: "My Profile - Drinkit",
-        user: req.session.user
+router.get("/profile", ensureAuthenticated, async (req, res, next) => {
+    try {
+        const userId = req.session.user.id;
+        
+        // Fetch the user's latest info from database
+        const [users] = await pool.query(
+            "SELECT id, role_id, first_name, last_name, email, mobile, profile_image, status, created_at FROM users WHERE id = ? LIMIT 1",
+            [userId]
+        );
+        
+        if (users.length === 0) {
+            req.flash("error", "User not found.");
+            return res.redirect("/auth/login");
+        }
+        
+        const user = users[0];
+        
+        // Fetch user default or latest address
+        const [addresses] = await pool.query(
+            "SELECT * FROM addresses WHERE user_id = ? ORDER BY is_default DESC, created_at DESC LIMIT 1",
+            [userId]
+        );
+        const address = addresses.length > 0 ? addresses[0] : null;
+        
+        res.render("user/profile", {
+            title: "My Profile - Drinkit",
+            user,
+            address
+        });
+    } catch (err) {
+        console.error("❌ Error fetching user profile:", err);
+        next(err);
+    }
+});
+
+router.post("/profile", ensureAuthenticated, (req, res, next) => {
+    const uploadSingle = upload.single("profile_image");
+    
+    uploadSingle(req, res, async function (err) {
+        if (err) {
+            req.flash("error", err.message);
+            return res.redirect("/profile");
+        }
+        
+        const userId = req.session.user.id;
+        const { first_name, last_name, mobile, address_line1, address_line2, city, state, pincode } = req.body;
+        
+        try {
+            // Server-side validation
+            if (!first_name || !first_name.trim()) {
+                req.flash("error", "First name cannot be empty.");
+                return res.redirect("/profile");
+            }
+            
+            // Check if profile image was uploaded
+            let profileImage = null;
+            if (req.file) {
+                profileImage = req.file.filename;
+            }
+            
+            // 1. Update users table
+            let userUpdateQuery = "UPDATE users SET first_name = ?, last_name = ?, mobile = ?";
+            const userUpdateParams = [first_name.trim(), last_name ? last_name.trim() : null, mobile ? mobile.trim() : null];
+            
+            if (profileImage) {
+                userUpdateQuery += ", profile_image = ?";
+                userUpdateParams.push(profileImage);
+            }
+            
+            userUpdateQuery += " WHERE id = ?";
+            userUpdateParams.push(userId);
+            
+            await pool.query(userUpdateQuery, userUpdateParams);
+            
+            // 2. Update address in addresses table
+            // Check if an address already exists for user
+            const [existingAddresses] = await pool.query(
+                "SELECT id FROM addresses WHERE user_id = ? ORDER BY is_default DESC, created_at DESC LIMIT 1",
+                [userId]
+            );
+            
+            const fullAddressName = [first_name.trim(), last_name ? last_name.trim() : ""].filter(Boolean).join(" ");
+            const addressMobile = mobile ? mobile.trim() : "";
+            
+            if (existingAddresses.length > 0) {
+                // Update existing address
+                const addressId = existingAddresses[0].id;
+                await pool.query(
+                    `UPDATE addresses SET 
+                        full_name = ?, 
+                        mobile = ?, 
+                        address_line1 = ?, 
+                        address_line2 = ?, 
+                        city = ?, 
+                        state = ?, 
+                        pincode = ? 
+                     WHERE user_id = ? AND id = ?`,
+                    [
+                        fullAddressName,
+                        addressMobile,
+                        address_line1 ? address_line1.trim() : "",
+                        address_line2 ? address_line2.trim() : null,
+                        city ? city.trim() : "",
+                        state ? state.trim() : "",
+                        pincode ? pincode.trim() : "",
+                        userId,
+                        addressId
+                    ]
+                );
+            } else if (address_line1 || city || state || pincode) {
+                // Create new default address if at least some fields are supplied
+                await pool.query(
+                    `INSERT INTO addresses (user_id, address_type, full_name, mobile, address_line1, address_line2, city, state, pincode, is_default)
+                     VALUES (?, 'home', ?, ?, ?, ?, ?, ?, ?, 1)`,
+                    [
+                        userId,
+                        fullAddressName,
+                        addressMobile,
+                        address_line1 ? address_line1.trim() : "",
+                        address_line2 ? address_line2.trim() : null,
+                        city ? city.trim() : "",
+                        state ? state.trim() : "",
+                        pincode ? pincode.trim() : ""
+                    ]
+                );
+            }
+            
+            // 3. Update session
+            const [updatedUsers] = await pool.query("SELECT * FROM users WHERE id = ? LIMIT 1", [userId]);
+            if (updatedUsers.length > 0) {
+                const updatedUser = updatedUsers[0];
+                req.session.user = {
+                    id: updatedUser.id,
+                    role_id: updatedUser.role_id,
+                    first_name: updatedUser.first_name,
+                    last_name: updatedUser.last_name,
+                    email: updatedUser.email,
+                    mobile: updatedUser.mobile,
+                    profile_image: updatedUser.profile_image
+                };
+            }
+            
+            req.flash("success", "Profile updated successfully.");
+            res.redirect("/profile");
+            
+        } catch (err) {
+            console.error("❌ Error updating profile:", err);
+            req.flash("error", "Unable to update profile. Please try again.");
+            res.redirect("/profile");
+        }
     });
 });
 

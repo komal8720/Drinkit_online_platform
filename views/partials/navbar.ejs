@@ -196,10 +196,12 @@
                         aria-expanded="false"
                     >
 
-                        <span class="user-avatar">
-
-                            <i class="bi bi-person-fill"></i>
-
+                        <span class="user-avatar" style="overflow: hidden;">
+                            <% if (user.profile_image) { %>
+                                <img src="/uploads/<%= user.profile_image %>" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                            <% } else { %>
+                                <i class="bi bi-person-fill"></i>
+                            <% } %>
                         </span>
 
                         <span class="user-name">
@@ -214,10 +216,12 @@
 
                         <li class="dropdown-user-info">
 
-                            <div class="dropdown-user-avatar">
-
-                                <i class="bi bi-person-fill"></i>
-
+                            <div class="dropdown-user-avatar" style="overflow: hidden;">
+                                <% if (user.profile_image) { %>
+                                    <img src="/uploads/<%= user.profile_image %>" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                <% } else { %>
+                                    <i class="bi bi-person-fill"></i>
+                                <% } %>
                             </div>
 
                             <div>
