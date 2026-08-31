@@ -257,8 +257,9 @@
                             <% if (product.is_featured) { %>
                                 <span class="product-badge">Popular</span>
                             <% } %>
-                            <button class="wishlist-btn">
-                                <i class="bi bi-heart"></i>
+                            <% const isWishlisted = typeof wishlistProductIds !== 'undefined' && wishlistProductIds.includes(product.id); %>
+                            <button class="wishlist-btn <%= isWishlisted ? 'active' : '' %>" data-product-id="<%= product.id %>">
+                                <i class="bi <%= isWishlisted ? 'bi-heart-fill' : 'bi-heart' %>"></i>
                             </button>
                             <a href="/product/<%= product.slug %>">
                                 <img src="<%= product.image || '/images/beer.jpg' %>" alt="<%= product.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
@@ -385,16 +386,6 @@ $(document).ready(function() {
             urlParams.set("page", page);
             window.location.search = urlParams.toString();
         }
-    });
-
-    // Wishlist Toggle
-    $(".wishlist-btn").on("click", function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        const icon = $(this).find("i");
-        icon.toggleClass("bi-heart");
-        icon.toggleClass("bi-heart-fill");
-        $(this).toggleClass("active");
     });
 });
 </script>

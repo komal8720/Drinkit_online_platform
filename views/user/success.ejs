@@ -140,6 +140,16 @@
                 <span class="text-dark"><%= order.address_name %></span>
             </div>
             <div class="detail-row">
+                <span>Payment Method:</span>
+                <span class="text-dark text-uppercase"><%= order.payment_method || 'cod' %></span>
+            </div>
+            <% if (order.razorpay_payment_id) { %>
+                <div class="detail-row">
+                    <span>Payment ID:</span>
+                    <span class="text-dark fw-bold"><%= order.razorpay_payment_id %></span>
+                </div>
+            <% } %>
+            <div class="detail-row">
                 <span>Total Paid:</span>
                 <span class="fw-bold text-wine">₹<%= parseInt(order.total_amount) %></span>
             </div>

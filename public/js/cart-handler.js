@@ -94,6 +94,7 @@ $(document).ready(function () {
                 if (data.success) {
                     replaceAddButtonWithControl(btn, 1);
                     updateCartCountBadge(data.cartCount);
+                    showToast("Added to cart 🛒");
                 } else {
                     showToast(data.message || "Unable to add product. Please try again.");
                     btn.prop("disabled", false);
@@ -214,4 +215,106 @@ $(document).ready(function () {
             }
         });
     });
+
+    // ==========================================
+    // WISHLIST FUNCTIONALITY
+    // ==========================================
+
+    function hydrateWishlistState() {
+        $.getJSON("/wishlist/ids", function (data) {
+            if (data.success && data.ids) {
+                data.ids.forEach(id => {
+                    $(`.wishlist-btn[data-product-id="${id}"], .details-wishlist-btn[data-product-id="${id}"], .category-wishlist[data-product-id="${id}"]`).each(function () {
+                        $(this).addClass("active");
+                        $(this).find("i").removeClass("bi-heart").addClass("bi-heart-fill");
+                    });
+                });
+            }
+        });
+    }
+
+    hydrateWishlistState();
+
+    // Toggle wishlist
+    $(document).on("click", ".wishlist-btn, .details-wishlist-btn, .category-wishlist", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const btn = $(this);
+        const productId = btn.data("product-id");
+        if (!productId) return;
+
+        // Double click protection
+        if (btn.data("loading")) return;
+        btn.data("loading", true);
+
+        const icon = btn.find("i");
+        const isRemove = btn.hasClass("active") || icon.hasClass("bi-heart-fill");
+        const url = isRemove ? "/wishlist/remove" : "/wishlist/add";
+
+        $.ajax({
+            url: url,
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ productId }),
+            success: function (data) {
+                if (data.success) {
+                    if (data.wishlisted) {
+                        btn.addClass("active");
+                        icon.removeClass("bi-heart").addClass("bi-heart-fill");
+                        showToast(data.message || "Added to wishlist ❤️");
+                        
+                        if (btn.hasClass("details-wishlist-btn")) {
+                            btn.find(".wishlist-text").text("In Wishlist");
+                        }
+                    } else {
+                        btn.removeClass("active");
+                        icon.removeClass("bi-heart-fill").addClass("bi-heart");
+                        showToast(data.message || "Removed from wishlist");
+
+                        if (btn.hasClass("details-wishlist-btn")) {
+                            btn.find(".wishlist-text").text("Add to Wishlist");
+                        }
+
+                        // If on wishlist page, remove the card dynamically
+                        if (window.location.pathname === "/wishlist") {
+                            const card = btn.closest(".wishlist-item-card");
+                            card.fadeOut(400, function () {
+                                card.remove();
+                                updateWishlistItemCount();
+                            });
+                        }
+                    }
+                } else if (data.requiresLogin) {
+                    alert(data.message || "Please login to manage your wishlist.");
+                    window.location.href = "/auth/login";
+                } else {
+                    showToast(data.message || "Unable to update wishlist.");
+                }
+            },
+            error: function (xhr) {
+                if (xhr.status === 401) {
+                    alert("Please login to manage your wishlist.");
+                    window.location.href = "/auth/login";
+                } else {
+                    showToast("Unable to update wishlist. Please try again.");
+                }
+            },
+            complete: function () {
+                btn.data("loading", false);
+            }
+        });
+    });
+
+    function updateWishlistItemCount() {
+        const cards = $(".wishlist-item-card");
+        const count = cards.length;
+        const countText = count === 1 ? "1 Item" : `${count} Items`;
+        $(".wishlist-count-text").text(countText);
+
+        if (count === 0) {
+            $("#wishlistGridContainer").hide();
+            $("#wishlistEmptyContainer").fadeIn();
+        }
+    }
 });

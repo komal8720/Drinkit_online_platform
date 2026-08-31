@@ -332,11 +332,210 @@ router.post("/profile", ensureAuthenticated, (req, res, next) => {
 // WISHLIST
 // ==========================================================
 
-router.get("/wishlist", ensureAuthenticated, (req, res) => {
-    res.render("user/wishlist", {
-        title: "My Wishlist - Drinkit",
-        user: req.session.user
-    });
+router.get("/wishlist", ensureAuthenticated, async (req, res, next) => {
+    try {
+        const userId = req.session.user.id;
+        
+        // Fetch all wishlist products for the user
+        const [wishlistItems] = await pool.query(
+            `SELECT p.*, c.name as category_name, c.slug as category_slug 
+             FROM wishlist w
+             JOIN products p ON w.product_id = p.id
+             LEFT JOIN categories c ON p.category_id = c.id
+             WHERE w.user_id = ?
+             ORDER BY w.created_at DESC`,
+            [userId]
+        );
+        
+        res.render("user/wishlist", {
+            title: "My Wishlist - Drinkit",
+            user: req.session.user,
+            wishlistItems
+        });
+    } catch (err) {
+        console.error("❌ Error fetching wishlist items:", err);
+        next(err);
+    }
+});
+
+router.get("/wishlist/ids", async (req, res) => {
+    try {
+        if (!req.session || !req.session.user) {
+            return res.json({ success: true, ids: [] });
+        }
+        const [rows] = await pool.query("SELECT product_id FROM wishlist WHERE user_id = ?", [req.session.user.id]);
+        const ids = rows.map(r => r.product_id);
+        res.json({ success: true, ids });
+    } catch (err) {
+        console.error("❌ Error fetching wishlist ids:", err);
+        res.status(500).json({ success: false, ids: [] });
+    }
+});
+
+router.post("/wishlist/add", async (req, res) => {
+    try {
+        if (!req.session || !req.session.user) {
+            return res.json({ 
+                success: false, 
+                loginRequired: true, 
+                requiresLogin: true, 
+                message: "Please login to add products to wishlist" 
+            });
+        }
+        
+        const userId = req.session.user.id;
+        const { productId } = req.body;
+        
+        if (!productId) {
+            return res.status(400).json({ success: false, message: "Product ID is required." });
+        }
+        
+        const [product] = await pool.query("SELECT id FROM products WHERE id = ? LIMIT 1", [productId]);
+        if (product.length === 0) {
+            return res.status(404).json({ success: false, message: "Product not found." });
+        }
+        
+        const [existing] = await pool.query(
+            "SELECT id FROM wishlist WHERE user_id = ? AND product_id = ? LIMIT 1",
+            [userId, productId]
+        );
+        
+        let action = "";
+        let message = "";
+        let wishlisted = true;
+        
+        if (existing.length > 0) {
+            await pool.query("DELETE FROM wishlist WHERE user_id = ? AND product_id = ?", [userId, productId]);
+            action = "removed";
+            message = "Product removed from wishlist";
+            wishlisted = false;
+        } else {
+            await pool.query("INSERT INTO wishlist (user_id, product_id) VALUES (?, ?)", [userId, productId]);
+            action = "added";
+            message = "Product added to wishlist";
+            wishlisted = true;
+        }
+        
+        const [countResult] = await pool.query("SELECT COUNT(*) as count FROM wishlist WHERE user_id = ?", [userId]);
+        const wishlistCount = countResult[0].count;
+        
+        res.json({
+            success: true,
+            action,
+            message,
+            wishlisted,
+            wishlistCount
+        });
+    } catch (err) {
+        console.error("❌ Error in /wishlist/add:", err);
+        res.status(500).json({ success: false, message: "Internal server error." });
+    }
+});
+
+router.post("/wishlist/remove", async (req, res) => {
+    try {
+        if (!req.session || !req.session.user) {
+            return res.json({ 
+                success: false, 
+                loginRequired: true, 
+                requiresLogin: true, 
+                message: "Please login to add products to wishlist" 
+            });
+        }
+        
+        const userId = req.session.user.id;
+        const { productId } = req.body;
+        
+        if (!productId) {
+            return res.status(400).json({ success: false, message: "Product ID is required." });
+        }
+        
+        const [product] = await pool.query("SELECT id FROM products WHERE id = ? LIMIT 1", [productId]);
+        if (product.length === 0) {
+            return res.status(404).json({ success: false, message: "Product not found." });
+        }
+        
+        const [existing] = await pool.query(
+            "SELECT id FROM wishlist WHERE user_id = ? AND product_id = ? LIMIT 1",
+            [userId, productId]
+        );
+        
+        let action = "";
+        let message = "";
+        let wishlisted = false;
+        
+        if (existing.length > 0) {
+            await pool.query("DELETE FROM wishlist WHERE user_id = ? AND product_id = ?", [userId, productId]);
+            action = "removed";
+            message = "Product removed from wishlist";
+            wishlisted = false;
+        } else {
+            await pool.query("INSERT INTO wishlist (user_id, product_id) VALUES (?, ?)", [userId, productId]);
+            action = "added";
+            message = "Product added to wishlist";
+            wishlisted = true;
+        }
+        
+        const [countResult] = await pool.query("SELECT COUNT(*) as count FROM wishlist WHERE user_id = ?", [userId]);
+        const wishlistCount = countResult[0].count;
+        
+        res.json({
+            success: true,
+            action,
+            message,
+            wishlisted,
+            wishlistCount
+        });
+    } catch (err) {
+        console.error("❌ Error in /wishlist/remove:", err);
+        res.status(500).json({ success: false, message: "Internal server error." });
+    }
+});
+
+router.post("/wishlist/toggle", async (req, res) => {
+    try {
+        if (!req.session || !req.session.user) {
+            return res.status(401).json({ success: false, message: "Please login to manage your wishlist." });
+        }
+        
+        const userId = req.session.user.id;
+        const { productId } = req.body;
+        
+        if (!productId) {
+            return res.status(400).json({ success: false, message: "Product ID is required." });
+        }
+        
+        // Check if item exists in wishlist
+        const [existing] = await pool.query(
+            "SELECT id FROM wishlist WHERE user_id = ? AND product_id = ? LIMIT 1",
+            [userId, productId]
+        );
+        
+        let action = "";
+        if (existing.length > 0) {
+            // Remove it
+            await pool.query("DELETE FROM wishlist WHERE user_id = ? AND product_id = ?", [userId, productId]);
+            action = "removed";
+        } else {
+            // Add it
+            await pool.query("INSERT INTO wishlist (user_id, product_id) VALUES (?, ?)", [userId, productId]);
+            action = "added";
+        }
+        
+        // Fetch updated wishlist count
+        const [countResult] = await pool.query("SELECT COUNT(*) as count FROM wishlist WHERE user_id = ?", [userId]);
+        const wishlistCount = countResult[0].count;
+        
+        res.json({
+            success: true,
+            action,
+            wishlistCount,
+            message: action === "added" ? "Added to wishlist ❤️" : "Removed from wishlist"
+        });
+    } catch (err) {
+        console.error("❌ Error toggling wishlist:", err);
+        res.status(500).json({ success: false, message: "Internal server error." });
+    }
 });
 
 
@@ -1212,7 +1411,7 @@ router.post("/checkout/create-order", ensureAuthenticated, async (req, res) => {
     }
 });
 
-// GET /checkout/payment/:orderId - Renders the payment gateway sandbox
+// GET /checkout/payment/:orderId - Renders the payment gateway
 router.get("/checkout/payment/:orderId", ensureAuthenticated, async (req, res, next) => {
     const userId = req.session.user.id;
     const orderId = req.params.orderId;
@@ -1235,23 +1434,239 @@ router.get("/checkout/payment/:orderId", ensureAuthenticated, async (req, res, n
             return res.redirect(`/checkout/success/${orderId}`);
         }
 
+        // Fetch customer prefill details securely from database
+        const [[user]] = await pool.query(
+            "SELECT first_name, last_name, email, mobile FROM users WHERE id = ? LIMIT 1",
+            [userId]
+        );
+        const customerName = `${user.first_name || ""} ${user.last_name || ""}`.trim();
+        const customerEmail = user.email || "";
+        const customerPhone = user.mobile || "";
+
         res.render("user/payment-sandbox", {
-            title: "Secure Payment Sandbox - Drinkit",
-            order
+            title: "Secure Order Payment - Drinkit",
+            order,
+            customerName,
+            customerEmail,
+            customerPhone,
+            razorpayKeyId: process.env.RAZORPAY_KEY_ID
         });
     } catch (err) {
-        console.error("Error loading payment sandbox:", err);
+        console.error("Error loading payment gateway:", err);
         next(err);
     }
 });
 
-// POST /checkout/payment/callback - Completes transaction simulation
-router.post("/checkout/payment/callback", ensureAuthenticated, async (req, res) => {
+// POST /checkout/create-razorpay-order - Creates Razorpay Order ID for online transactions
+router.post("/checkout/create-razorpay-order", ensureAuthenticated, async (req, res) => {
     const userId = req.session.user.id;
-    const { orderId, status } = req.body;
+    const { internalOrderId, orderId } = req.body;
+    const actualOrderId = orderId || internalOrderId;
 
-    if (!orderId || !status) {
+    console.log("[Razorpay] Create order request received");
+    console.log("[Razorpay] Order ID:", actualOrderId);
+    console.log("[Razorpay] Key configured:", !!process.env.RAZORPAY_KEY_ID);
+
+    if (!actualOrderId) {
+        return res.status(400).json({ success: false, message: "Order ID is required." });
+    }
+
+    try {
+        const [[order]] = await pool.query(
+            "SELECT * FROM orders WHERE id = ? AND customer_id = ? LIMIT 1",
+            [actualOrderId, userId]
+        );
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found." });
+        }
+
+        console.log("[Razorpay] Amount:", order.total_amount);
+
+        const [[payment]] = await pool.query(
+            "SELECT * FROM payments WHERE order_id = ? LIMIT 1",
+            [actualOrderId]
+        );
+
+        if (!payment) {
+            return res.status(404).json({ success: false, message: "Payment record not found." });
+        }
+
+        if (order.payment_status === "paid" || payment.status === "success") {
+            return res.json({ success: true, alreadyPaid: true, redirectUrl: `/checkout/success/${actualOrderId}` });
+        }
+
+        let razorpayOrderId = payment.razorpay_order_id;
+        const amountInPaise = Math.round(Number(order.total_amount) * 100);
+
+        if (!Number.isFinite(amountInPaise) || amountInPaise <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid payment amount"
+            });
+        }
+
+        console.log("[Razorpay] Amount in paise:", amountInPaise);
+
+        if (!razorpayOrderId) {
+            const razorpay = require("../config/razorpay");
+            const options = {
+                amount: amountInPaise,
+                currency: "INR",
+                receipt: "order_" + actualOrderId,
+                notes: {
+                    database_order_id: String(actualOrderId)
+                }
+            };
+
+            try {
+                const razorpayOrder = await razorpay.orders.create(options);
+                razorpayOrderId = razorpayOrder.id;
+                console.log("[Razorpay] Razorpay order created:", razorpayOrderId);
+
+                await pool.query(
+                    "UPDATE payments SET razorpay_order_id = ? WHERE order_id = ?",
+                    [razorpayOrderId, actualOrderId]
+                );
+            } catch (error) {
+                console.error("[Razorpay] Order creation failed:", error);
+                return res.status(500).json({
+                    success: false,
+                    message: "Unable to create Razorpay order"
+                });
+            }
+        }
+
+        return res.json({
+            success: true,
+            key: process.env.RAZORPAY_KEY_ID,
+            orderId: razorpayOrderId,
+            amount: amountInPaise,
+            currency: "INR"
+        });
+    } catch (err) {
+        console.error("Error creating Razorpay order:", err);
+        return res.status(500).json({ success: false, message: "Unable to process payment order creation." });
+    }
+});
+
+// POST /checkout/verify-payment - Verifies Razorpay payment signature securely on server
+router.post("/checkout/verify-payment", ensureAuthenticated, async (req, res) => {
+    const userId = req.session.user.id;
+    const {
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature,
+        internal_order_id,
+        orderId
+    } = req.body;
+
+    const actualOrderId = orderId || internal_order_id;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !actualOrderId) {
         return res.status(400).json({ success: false, message: "Invalid parameters." });
+    }
+
+    const conn = await pool.getConnection();
+    try {
+        await conn.beginTransaction();
+
+        const [[order]] = await conn.query(
+            "SELECT * FROM orders WHERE id = ? AND customer_id = ? LIMIT 1 FOR UPDATE",
+            [actualOrderId, userId]
+        );
+
+        if (!order) {
+            await conn.rollback();
+            conn.release();
+            return res.status(404).json({ success: false, message: "Order not found." });
+        }
+
+        const [[payment]] = await conn.query(
+            "SELECT * FROM payments WHERE order_id = ? LIMIT 1 FOR UPDATE",
+            [actualOrderId]
+        );
+
+        if (!payment) {
+            await conn.rollback();
+            conn.release();
+            return res.status(404).json({ success: false, message: "Payment record not found." });
+        }
+
+        if (order.payment_status === "paid" || payment.status === "success") {
+            await conn.commit();
+            conn.release();
+            return res.json({ success: true, message: "Payment already verified.", redirectUrl: `/checkout/success/${actualOrderId}` });
+        }
+
+        const crypto = require("crypto");
+        const generatedSignature = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(razorpay_order_id + "|" + razorpay_payment_id)
+            .digest("hex");
+
+        let isSignatureValid = false;
+        try {
+            const genBuffer = Buffer.from(generatedSignature, "utf-8");
+            const sigBuffer = Buffer.from(razorpay_signature, "utf-8");
+            if (genBuffer.length === sigBuffer.length) {
+                isSignatureValid = crypto.timingSafeEqual(genBuffer, sigBuffer);
+            }
+        } catch (err) {
+            console.error("Signature security comparison error:", err);
+        }
+
+        if (!isSignatureValid) {
+            await conn.rollback();
+            conn.release();
+            return res.status(400).json({ success: false, message: "Payment verification failed. Invalid signature." });
+        }
+
+        await conn.query(
+            `UPDATE orders 
+             SET payment_status = 'paid', order_status = 'confirmed', 
+                 razorpay_order_id = ?, razorpay_payment_id = ?, razorpay_signature = ? 
+             WHERE id = ?`,
+            [razorpay_order_id, razorpay_payment_id, razorpay_signature, actualOrderId]
+        );
+
+        await conn.query(
+            `UPDATE payments 
+             SET status = 'success', razorpay_payment_id = ?, razorpay_order_id = ?, razorpay_signature = ?, paid_at = NOW() 
+             WHERE order_id = ?`,
+            [razorpay_payment_id, razorpay_order_id, razorpay_signature, actualOrderId]
+        );
+
+        const [carts] = await conn.query("SELECT id FROM carts WHERE user_id = ? LIMIT 1", [userId]);
+        if (carts.length > 0) {
+            const cartId = carts[0].id;
+            await conn.query("DELETE FROM cart_items WHERE cart_id = ?", [cartId]);
+            try {
+                await conn.query("DELETE FROM cart WHERE user_id = ?", [userId]);
+            } catch (flatErr) {
+                console.error("Flat cart table clear error:", flatErr.message);
+            }
+        }
+
+        await conn.commit();
+        conn.release();
+
+        return res.json({ success: true, redirectUrl: `/checkout/success/${actualOrderId}` });
+    } catch (err) {
+        await conn.rollback();
+        conn.release();
+        console.error("Error verifying payments:", err);
+        return res.status(500).json({ success: false, message: "Internal server error." });
+    }
+});
+
+// POST /checkout/payment/cancel - Handles customer cancelling secure payment
+router.post("/checkout/payment/cancel", ensureAuthenticated, async (req, res) => {
+    const userId = req.session.user.id;
+    const { orderId } = req.body;
+
+    if (!orderId) {
+        return res.status(400).json({ success: false, message: "Order ID is required." });
     }
 
     try {
@@ -1264,35 +1679,9 @@ router.post("/checkout/payment/callback", ensureAuthenticated, async (req, res) 
             return res.status(404).json({ success: false, message: "Order not found." });
         }
 
-        if (status === "success") {
-            // Update order and payment status to successful/paid
-            const transactionId = "TXN-" + Date.now() + Math.floor(Math.random() * 1000);
-            
+        if (order.payment_status !== 'failed' && order.order_status !== 'cancelled') {
             await pool.query(
-                "UPDATE orders SET payment_status = 'paid', order_status = 'confirmed' WHERE id = ?",
-                [orderId]
-            );
-
-            await pool.query(
-                "UPDATE payments SET status = 'success', transaction_id = ?, paid_at = NOW() WHERE order_id = ?",
-                [transactionId, orderId]
-            );
-
-            // Clear user's cart
-            const [carts] = await pool.query("SELECT id FROM carts WHERE user_id = ? LIMIT 1", [userId]);
-            if (carts.length > 0) {
-                const cartId = carts[0].id;
-                await pool.query("DELETE FROM cart_items WHERE cart_id = ?", [cartId]);
-                try {
-                    await pool.query("DELETE FROM cart WHERE user_id = ?", [userId]);
-                } catch (flatErr) {}
-            }
-
-            return res.json({ success: true, redirectUrl: `/checkout/success/${orderId}` });
-        } else {
-            // Update status to failed
-            await pool.query(
-                "UPDATE orders SET payment_status = 'failed', order_status = 'pending' WHERE id = ?",
+                "UPDATE orders SET payment_status = 'failed', order_status = 'cancelled' WHERE id = ?",
                 [orderId]
             );
 
@@ -1301,18 +1690,135 @@ router.post("/checkout/payment/callback", ensureAuthenticated, async (req, res) 
                 [orderId]
             );
 
-            // Return stock to inventory since payment failed
             const [items] = await pool.query("SELECT product_id, quantity FROM order_items WHERE order_id = ?", [orderId]);
             for (const item of items) {
                 await pool.query("UPDATE products SET stock_quantity = stock_quantity + ? WHERE id = ?", [item.quantity, item.product_id]);
             }
-
-            req.flash("error", "Online payment simulation failed or was cancelled.");
-            return res.json({ success: true, redirectUrl: "/cart" });
         }
+
+        req.flash("error", "Payment cancelled. Items remain in your cart.");
+        return res.json({ success: true, redirectUrl: "/cart" });
     } catch (err) {
-        console.error("Error processing payment callback:", err);
-        return res.status(500).json({ success: false, message: "Failed to process transaction." });
+        console.error("Error cancelling order:", err);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
+// POST /webhooks/razorpay - Handles secure Razorpay webhook callbacks
+router.post("/webhooks/razorpay", async (req, res) => {
+    const signature = req.headers["x-razorpay-signature"];
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || process.env.RAZORPAY_KEY_SECRET;
+
+    if (!signature) {
+        return res.status(400).json({ success: false, message: "Missing signature header." });
+    }
+
+    try {
+        const crypto = require("crypto");
+        const expectedSignature = crypto
+            .createHmac("sha256", webhookSecret)
+            .update(req.rawBody || "")
+            .digest("hex");
+
+        if (signature !== expectedSignature) {
+            console.error("❌ Webhook verification failed. Invalid signature.");
+            return res.status(400).json({ success: false, message: "Invalid signature." });
+        }
+
+        const event = req.body.event;
+        const payload = req.body.payload;
+
+        console.log(`🔔 Razorpay Webhook Event: ${event}`);
+
+        if (event === "order.paid" || event === "payment.captured") {
+            const paymentEntity = payload.payment.entity;
+            const razorpayOrderId = paymentEntity.order_id;
+            const razorpayPaymentId = paymentEntity.id;
+            const razorpaySignature = signature;
+
+            const [[paymentRecord]] = await pool.query(
+                "SELECT * FROM payments WHERE razorpay_order_id = ? LIMIT 1",
+                [razorpayOrderId]
+            );
+
+            if (paymentRecord) {
+                const internalOrderId = paymentRecord.order_id;
+
+                if (paymentRecord.status !== "success") {
+                    const conn = await pool.getConnection();
+                    try {
+                        await conn.beginTransaction();
+
+                        await conn.query(
+                            `UPDATE orders 
+                             SET payment_status = 'paid', order_status = 'confirmed',
+                                 razorpay_order_id = ?, razorpay_payment_id = ?, razorpay_signature = ?
+                             WHERE id = ?`,
+                            [razorpayOrderId, razorpayPaymentId, razorpaySignature, internalOrderId]
+                        );
+
+                        await conn.query(
+                            `UPDATE payments 
+                             SET status = 'success', razorpay_payment_id = ?, razorpay_signature = ?, paid_at = NOW() 
+                             WHERE order_id = ?`,
+                            [razorpayPaymentId, razorpaySignature, internalOrderId]
+                        );
+
+                        const [[orderRecord]] = await conn.query(
+                            "SELECT customer_id FROM orders WHERE id = ? LIMIT 1",
+                            [internalOrderId]
+                        );
+
+                        if (orderRecord) {
+                            const customerId = orderRecord.customer_id;
+                            const [carts] = await conn.query("SELECT id FROM carts WHERE user_id = ? LIMIT 1", [customerId]);
+                            if (carts.length > 0) {
+                                const cartId = carts[0].id;
+                                await conn.query("DELETE FROM cart_items WHERE cart_id = ?", [cartId]);
+                                try {
+                                    await conn.query("DELETE FROM cart WHERE user_id = ?", [customerId]);
+                                } catch (flatErr) {}
+                            }
+                        }
+
+                        await conn.commit();
+                        conn.release();
+                        console.log(`✅ Webhook processed payment successfully for Order ID: ${internalOrderId}`);
+                    } catch (dbErr) {
+                        await conn.rollback();
+                        conn.release();
+                        console.error("Error inside webhook transaction:", dbErr);
+                        return res.status(500).json({ success: false, message: "Database transaction update failed." });
+                    }
+                }
+            }
+        } else if (event === "payment.failed") {
+            const paymentEntity = payload.payment.entity;
+            const razorpayOrderId = paymentEntity.order_id;
+
+            const [[paymentRecord]] = await pool.query(
+                "SELECT * FROM payments WHERE razorpay_order_id = ? LIMIT 1",
+                [razorpayOrderId]
+            );
+
+            if (paymentRecord && paymentRecord.status === "pending") {
+                const internalOrderId = paymentRecord.order_id;
+                
+                await pool.query("UPDATE orders SET payment_status = 'failed' WHERE id = ?", [internalOrderId]);
+                await pool.query("UPDATE payments SET status = 'failed' WHERE id = ?", [paymentRecord.id]);
+
+                const [items] = await pool.query("SELECT product_id, quantity FROM order_items WHERE order_id = ?", [internalOrderId]);
+                for (const item of items) {
+                    await pool.query("UPDATE products SET stock_quantity = stock_quantity + ? WHERE id = ?", [item.quantity, item.product_id]);
+                }
+                console.log(`❌ Webhook processed transaction failure for Order ID: ${internalOrderId}`);
+            }
+        }
+
+        return res.json({ status: "ok" });
+    } catch (err) {
+        console.error("Error processing Razorpay webhook:", err);
+        return res.status(500).json({ success: false, message: "Internal server error." });
     }
 });
 
@@ -1323,9 +1829,11 @@ router.get("/checkout/success/:orderId", ensureAuthenticated, async (req, res, n
 
     try {
         const [[order]] = await pool.query(
-            `SELECT o.*, a.full_name as address_name, a.address_line1, a.address_line2, a.city, a.state, a.pincode, a.mobile as address_mobile
+            `SELECT o.*, a.full_name as address_name, a.address_line1, a.address_line2, a.city, a.state, a.pincode, a.mobile as address_mobile,
+                    p.payment_method, p.razorpay_payment_id, p.status as payment_status_detail
              FROM orders o
              JOIN addresses a ON o.address_id = a.id
+             LEFT JOIN payments p ON o.id = p.order_id
              WHERE o.id = ? AND o.customer_id = ? LIMIT 1`,
             [orderId, userId]
         );

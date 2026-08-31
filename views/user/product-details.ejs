@@ -139,14 +139,16 @@
             background: #ffffff;
             border: 1px solid var(--drinkit-border);
             border-radius: 12px;
-            width: 50px;
             height: 50px;
+            padding: 0 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 15px;
+            font-weight: 700;
             color: var(--drinkit-muted);
             transition: 0.2s ease;
+            gap: 8px;
         }
         .details-wishlist-btn:hover, .details-wishlist-btn.active {
             color: var(--drinkit-wine);
@@ -260,8 +262,10 @@
                     <button class="details-add-btn add-cart-btn" data-product-id="<%= product.id %>">
                         <i class="bi bi-plus-lg me-2"></i>Add to Cart
                     </button>
-                    <button class="details-wishlist-btn">
-                        <i class="bi bi-heart"></i>
+                    <% const isWishlisted = typeof wishlistProductIds !== 'undefined' && wishlistProductIds.includes(product.id); %>
+                    <button class="details-wishlist-btn <%= isWishlisted ? 'active' : '' %>" data-product-id="<%= product.id %>">
+                        <i class="bi <%= isWishlisted ? 'bi-heart-fill' : 'bi-heart' %>"></i>
+                        <span class="wishlist-text"><%= isWishlisted ? 'In Wishlist' : 'Add to Wishlist' %></span>
                     </button>
                 </div>
 
@@ -347,8 +351,9 @@
                                 <% if (prod.is_featured) { %>
                                     <span class="category-product-badge">Popular</span>
                                 <% } %>
-                                <button class="category-wishlist wishlist-btn">
-                                    <i class="bi bi-heart"></i>
+                                <% const isWishlisted = typeof wishlistProductIds !== 'undefined' && wishlistProductIds.includes(prod.id); %>
+                                <button class="category-wishlist wishlist-btn <%= isWishlisted ? 'active' : '' %>" data-product-id="<%= prod.id %>">
+                                    <i class="bi <%= isWishlisted ? 'bi-heart-fill' : 'bi-heart' %>"></i>
                                 </button>
                                 <a href="/product/<%= prod.slug %>">
                                     <img src="<%= prod.image || '/images/beer.jpg' %>" alt="<%= prod.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
@@ -404,8 +409,9 @@
                                 <% if (snack.is_featured) { %>
                                     <span class="category-product-badge">Popular</span>
                                 <% } %>
-                                <button class="category-wishlist wishlist-btn">
-                                    <i class="bi bi-heart"></i>
+                                <% const isWishlisted = typeof wishlistProductIds !== 'undefined' && wishlistProductIds.includes(snack.id); %>
+                                <button class="category-wishlist wishlist-btn <%= isWishlisted ? 'active' : '' %>" data-product-id="<%= snack.id %>">
+                                    <i class="bi <%= isWishlisted ? 'bi-heart-fill' : 'bi-heart' %>"></i>
                                 </button>
                                 <a href="/product/<%= snack.slug %>">
                                     <img src="<%= snack.image || '/images/beer.jpg' %>" alt="<%= snack.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
@@ -461,8 +467,9 @@
                                 <% if (drink.is_featured) { %>
                                     <span class="category-product-badge">Popular</span>
                                 <% } %>
-                                <button class="category-wishlist wishlist-btn">
-                                    <i class="bi bi-heart"></i>
+                                <% const isWishlisted = typeof wishlistProductIds !== 'undefined' && wishlistProductIds.includes(drink.id); %>
+                                <button class="category-wishlist wishlist-btn <%= isWishlisted ? 'active' : '' %>" data-product-id="<%= drink.id %>">
+                                    <i class="bi <%= isWishlisted ? 'bi-heart-fill' : 'bi-heart' %>"></i>
                                 </button>
                                 <a href="/product/<%= drink.slug %>">
                                     <img src="<%= drink.image || '/images/beer.jpg' %>" alt="<%= drink.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
@@ -518,8 +525,9 @@
                                 <% if (spirit.is_featured) { %>
                                     <span class="category-product-badge">Popular</span>
                                 <% } %>
-                                <button class="category-wishlist wishlist-btn">
-                                    <i class="bi bi-heart"></i>
+                                <% const isWishlisted = typeof wishlistProductIds !== 'undefined' && wishlistProductIds.includes(spirit.id); %>
+                                <button class="category-wishlist wishlist-btn <%= isWishlisted ? 'active' : '' %>" data-product-id="<%= spirit.id %>">
+                                    <i class="bi <%= isWishlisted ? 'bi-heart-fill' : 'bi-heart' %>"></i>
                                 </button>
                                 <a href="/product/<%= spirit.slug %>">
                                     <img src="<%= spirit.image || '/images/beer.jpg' %>" alt="<%= spirit.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
@@ -579,25 +587,6 @@ $(document).ready(function() {
                 left: direction * scrollAmount,
                 behavior: "smooth"
             });
-        }
-    });
-
-    // Wishlist Toggle
-    $(".wishlist-btn, .details-wishlist-btn").on("click", function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        
-        let icon;
-        if ($(this).hasClass("details-wishlist-btn")) {
-            icon = $(this).find("i");
-            $(this).toggleClass("active");
-            icon.toggleClass("bi-heart");
-            icon.toggleClass("bi-heart-fill");
-        } else {
-            icon = $(this).find("i");
-            icon.toggleClass("bi-heart");
-            icon.toggleClass("bi-heart-fill");
-            $(this).toggleClass("active");
         }
     });
 });

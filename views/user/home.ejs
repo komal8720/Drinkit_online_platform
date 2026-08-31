@@ -661,8 +661,9 @@
                                 <% const pct = Math.round(((product.sale_price - product.price) / product.sale_price) * 100); %>
                                 <span class="product-badge offer"><%= pct %>% OFF</span>
                             <% } %>
-                            <button class="wishlist-btn category-wishlist">
-                                <i class="bi bi-heart"></i>
+                            <% const isWishlisted = typeof wishlistProductIds !== 'undefined' && wishlistProductIds.includes(product.id); %>
+                            <button class="wishlist-btn category-wishlist <%= isWishlisted ? 'active' : '' %>" data-product-id="<%= product.id %>">
+                                <i class="bi <%= isWishlisted ? 'bi-heart-fill' : 'bi-heart' %>"></i>
                             </button>
                             <a href="/product/<%= product.slug %>">
                                 <img src="<%= product.image || '/images/beer.jpg' %>" alt="<%= product.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
@@ -735,8 +736,9 @@
                                 <% if (product.is_featured) { %>
                                     <span class="category-product-badge">Popular</span>
                                 <% } %>
-                                <button class="category-wishlist wishlist-btn">
-                                    <i class="bi bi-heart"></i>
+                                <% const isWishlisted = typeof wishlistProductIds !== 'undefined' && wishlistProductIds.includes(product.id); %>
+                                <button class="category-wishlist wishlist-btn <%= isWishlisted ? 'active' : '' %>" data-product-id="<%= product.id %>">
+                                    <i class="bi <%= isWishlisted ? 'bi-heart-fill' : 'bi-heart' %>"></i>
                                 </button>
                                 <a href="/product/<%= product.slug %>">
                                     <img src="<%= product.image || '/images/beer.jpg' %>" alt="<%= product.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
@@ -805,8 +807,9 @@
                                 <% if (product.is_featured) { %>
                                     <span class="category-product-badge">Popular</span>
                                 <% } %>
-                                <button class="category-wishlist wishlist-btn">
-                                    <i class="bi bi-heart"></i>
+                                <% const isWishlisted = typeof wishlistProductIds !== 'undefined' && wishlistProductIds.includes(product.id); %>
+                                <button class="category-wishlist wishlist-btn <%= isWishlisted ? 'active' : '' %>" data-product-id="<%= product.id %>">
+                                    <i class="bi <%= isWishlisted ? 'bi-heart-fill' : 'bi-heart' %>"></i>
                                 </button>
                                 <a href="/product/<%= product.slug %>">
                                     <img src="<%= product.image || '/images/beer.jpg' %>" alt="<%= product.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
@@ -875,8 +878,9 @@
                                 <% if (product.is_featured) { %>
                                     <span class="category-product-badge">Popular</span>
                                 <% } %>
-                                <button class="category-wishlist wishlist-btn">
-                                    <i class="bi bi-heart"></i>
+                                <% const isWishlisted = typeof wishlistProductIds !== 'undefined' && wishlistProductIds.includes(product.id); %>
+                                <button class="category-wishlist wishlist-btn <%= isWishlisted ? 'active' : '' %>" data-product-id="<%= product.id %>">
+                                    <i class="bi <%= isWishlisted ? 'bi-heart-fill' : 'bi-heart' %>"></i>
                                 </button>
                                 <a href="/product/<%= product.slug %>">
                                     <img src="<%= product.image || '/images/beer.jpg' %>" alt="<%= product.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
@@ -948,8 +952,9 @@
                                 <% if (product.is_featured) { %>
                                     <span class="category-product-badge">Popular</span>
                                 <% } %>
-                                <button class="category-wishlist wishlist-btn">
-                                    <i class="bi bi-heart"></i>
+                                <% const isWishlisted = typeof wishlistProductIds !== 'undefined' && wishlistProductIds.includes(product.id); %>
+                                <button class="category-wishlist wishlist-btn <%= isWishlisted ? 'active' : '' %>" data-product-id="<%= product.id %>">
+                                    <i class="bi <%= isWishlisted ? 'bi-heart-fill' : 'bi-heart' %>"></i>
                                 </button>
                                 <a href="/product/<%= product.slug %>">
                                     <img src="<%= product.image || '/images/beer.jpg' %>" alt="<%= product.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
@@ -1018,8 +1023,9 @@
                                 <% if (product.is_featured) { %>
                                     <span class="category-product-badge">Popular</span>
                                 <% } %>
-                                <button class="category-wishlist wishlist-btn">
-                                    <i class="bi bi-heart"></i>
+                                <% const isWishlisted = typeof wishlistProductIds !== 'undefined' && wishlistProductIds.includes(product.id); %>
+                                <button class="category-wishlist wishlist-btn <%= isWishlisted ? 'active' : '' %>" data-product-id="<%= product.id %>">
+                                    <i class="bi <%= isWishlisted ? 'bi-heart-fill' : 'bi-heart' %>"></i>
                                 </button>
                                 <a href="/product/<%= product.slug %>">
                                     <img src="<%= product.image || '/images/beer.jpg' %>" alt="<%= product.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
@@ -1088,8 +1094,9 @@
                                 <% if (product.is_featured) { %>
                                     <span class="category-product-badge">Popular</span>
                                 <% } %>
-                                <button class="category-wishlist wishlist-btn">
-                                    <i class="bi bi-heart"></i>
+                                <% const isWishlisted = typeof wishlistProductIds !== 'undefined' && wishlistProductIds.includes(product.id); %>
+                                <button class="category-wishlist wishlist-btn <%= isWishlisted ? 'active' : '' %>" data-product-id="<%= product.id %>">
+                                    <i class="bi <%= isWishlisted ? 'bi-heart-fill' : 'bi-heart' %>"></i>
                                 </button>
                                 <a href="/product/<%= product.slug %>">
                                     <img src="<%= product.image || '/images/beer.jpg' %>" alt="<%= product.name %>" onerror="this.onerror=null;this.src='/images/beer.jpg';">
@@ -1284,63 +1291,7 @@
 <!-- ==========================================================
      BOOTSTRAP JS
 ========================================================== -->
-<script>
-    // wine slider scroll functionality
 
-    function scrollWineSlider(direction) {
-
-        const slider = document.getElementById("wineProductsSlider");
-
-        const card = slider.querySelector(".category-product-card");
-
-        if (!card) return;
-
-        const cardWidth = card.offsetWidth + 14;
-
-        slider.scrollBy({
-            left: direction * cardWidth * 2,
-            behavior: "smooth"
-        });
-    }
-    // beer slider scroll functionality
-    document.addEventListener("DOMContentLoaded", function () {
-
-        const slider = document.getElementById("beerSlider");
-
-        const nextButton =
-            document.querySelector(
-                '.category-slider-next[data-slider="beerSlider"]'
-            );
-
-        const prevButton =
-            document.querySelector(
-                '.category-slider-prev[data-slider="beerSlider"]'
-            );
-
-
-        nextButton.addEventListener("click", function () {
-
-            slider.scrollBy({
-                left: 450,
-                behavior: "smooth"
-            });
-
-        });
-
-
-        prevButton.addEventListener("click", function () {
-
-            slider.scrollBy({
-                left: -450,
-                behavior: "smooth"
-            });
-
-        });
-
-    });
-
-
-</script>
 <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
     
@@ -1364,19 +1315,9 @@ $(document).ready(function() {
             });
         }
     });
-
-    // Wishlist Toggle
-    $(document).on("click", ".category-wishlist", function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const icon = $(this).find("i");
-        icon.toggleClass("bi-heart");
-        icon.toggleClass("bi-heart-fill");
-        $(this).toggleClass("active");
-    });
 });
 </script>
 
 </body>
 
-</html>/
+</html>

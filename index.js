@@ -39,7 +39,8 @@ const PORT = process.env.PORT || 3000;
 
 app.use(
     helmet({
-        contentSecurityPolicy: false
+        contentSecurityPolicy: false,
+        crossOriginOpenerPolicy: false
     })
 );
 
@@ -70,7 +71,11 @@ app.use(
 // BODY PARSER
 // ==========================================================
 
-app.use(express.json());
+app.use(express.json({
+    verify: (req, res, buf) => {
+        req.rawBody = buf.toString();
+    }
+}));
 
 app.use(
     express.urlencoded({
@@ -180,8 +185,21 @@ app.use(async (req, res, next) => {
     }
     res.locals.cartCount = Number(cartCount);
 
-    next();
+    // Fetch dynamic wishlist product IDs for logged-in user
+    res.locals.wishlistProductIds = [];
+    if (req.session.user) {
+        try {
+            const [wishlistRows] = await pool.query(
+                "SELECT product_id FROM wishlist WHERE user_id = ?",
+                [req.session.user.id]
+            );
+            res.locals.wishlistProductIds = wishlistRows.map(r => r.product_id);
+        } catch (err) {
+            console.error("Error fetching global wishlist product IDs:", err);
+        }
+    }
 
+    next();
 });
 
 

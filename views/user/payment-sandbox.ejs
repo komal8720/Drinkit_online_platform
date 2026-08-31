@@ -7,38 +7,60 @@
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/user/home.css">
+    
+    <!-- Razorpay Checkout -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
     <style>
         body {
-            background-color: #f7f9fc;
+            background-color: #faf7f8;
             font-family: sans-serif;
+        }
+        .payment-container {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
         }
         .payment-box {
             background-color: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            max-width: 480px;
-            margin: 80px auto;
-            border: 1px solid #eef2f5;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(115, 27, 50, 0.05);
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid var(--drinkit-border, #e9e4e5);
             overflow: hidden;
         }
         .payment-header {
-            background-color: #731b32; /* Drinkit Wine color */
+            background-color: #731b32; /* Drinkit Maroon primary */
             color: #ffffff;
-            padding: 24px;
+            padding: 30px 24px;
             text-align: center;
+            border-bottom: 3px solid #c9a227; /* Drinkit Gold border */
         }
         .payment-header h3 {
             font-weight: 800;
-            font-size: 20px;
+            font-size: 22px;
             margin: 0;
         }
         .payment-header p {
             font-size: 13px;
-            opacity: 0.8;
-            margin: 4px 0 0 0;
+            opacity: 0.9;
+            margin: 6px 0 0 0;
+            letter-spacing: 0.5px;
         }
         .payment-body {
             padding: 30px;
+        }
+        .order-summary-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #171717;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #f0eaeb;
+            padding-bottom: 8px;
         }
         .order-meta-row {
             display: flex;
@@ -49,9 +71,10 @@
             font-weight: 600;
         }
         .amount-row {
-            border-top: 1px dashed #eef2f5;
-            border-bottom: 1px dashed #eef2f5;
-            padding: 16px 0;
+            background-color: #fffaf7;
+            border: 1px solid rgba(115, 27, 50, 0.08);
+            border-radius: 12px;
+            padding: 16px;
             margin: 20px 0;
             display: flex;
             justify-content: space-between;
@@ -59,21 +82,13 @@
         }
         .amount-label {
             font-weight: 700;
-            font-size: 16px;
-            color: #2c2527;
+            font-size: 15px;
+            color: #171717;
         }
         .amount-value {
             font-weight: 800;
             font-size: 24px;
             color: #731b32;
-        }
-        .payment-methods-logos {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            font-size: 24px;
-            color: #888082;
-            margin-bottom: 25px;
         }
         .btn-payment-action {
             width: 100%;
@@ -83,148 +98,296 @@
             border: none;
             margin-bottom: 12px;
             transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        .btn-payment-success {
-            background-color: #198754;
+        .btn-pay-securely {
+            background-color: #731b32;
             color: #ffffff;
         }
-        .btn-payment-success:hover {
-            background-color: #157347;
-        }
-        .btn-payment-fail {
-            background-color: #dc3545;
+        .btn-pay-securely:hover {
+            background-color: #5e1427;
             color: #ffffff;
         }
-        .btn-payment-fail:hover {
-            background-color: #bb2d3b;
+        .btn-pay-securely:disabled {
+            background-color: #dcd7d8;
+            color: #888082;
+            cursor: not-allowed;
         }
         .btn-payment-cancel {
             background-color: transparent;
-            color: #888082;
+            color: #777777;
             border: 1px solid #dcd7d8;
         }
         .btn-payment-cancel:hover {
-            background-color: #f8f9fa;
+            background-color: #fcf9f9;
+            color: #731b32;
+            border-color: #731b32;
+        }
+        .btn-payment-cancel:disabled {
+            cursor: not-allowed;
+        }
+        .secured-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #777777;
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="payment-box">
-        <!-- Header -->
-        <div class="payment-header">
-            <h3><i class="bi bi-shield-lock-fill me-1"></i> Secure Payment Gateway</h3>
-            <p>DRINKIT ONLINE TRANSACTION SERVICE</p>
-        </div>
+    <!-- NAVBAR -->
+    <%- include('../partials/navbar') %>
 
-        <!-- Body -->
-        <div class="payment-body">
-            
-            <div class="text-center mb-4">
-                <span class="badge bg-secondary p-2 small mb-2"><i class="bi bi-cpu me-1"></i> Sandbox Environment</span>
-                <p class="text-muted small">You are in payment simulation mode. No real money will be charged.</p>
+    <div class="container payment-container">
+        <div class="payment-box">
+            <!-- Header -->
+            <div class="payment-header">
+                <h3><i class="bi bi-shield-lock-fill me-1"></i> Secure Checkout</h3>
+                <p>DRINKIT ONLINE TRANSACTION SYSTEM</p>
             </div>
 
-            <!-- Order Details -->
-            <div class="order-meta-row">
-                <span>Order Number:</span>
-                <span class="text-dark"><%= order.order_number %></span>
+            <!-- Body -->
+            <div class="payment-body">
+                <div id="paymentAlertContainer"></div>
+
+                <!-- Order Details -->
+                <div class="order-summary-title">Order Summary</div>
+                
+                <div class="order-meta-row">
+                    <span>Order ID:</span>
+                    <span class="text-dark">#<%= order.order_number %></span>
+                </div>
+
+                <div class="order-meta-row">
+                    <span>Customer Name:</span>
+                    <span class="text-dark"><%= customerName %></span>
+                </div>
+
+                <div class="order-meta-row">
+                    <span>Email:</span>
+                    <span class="text-dark"><%= customerEmail %></span>
+                </div>
+
+                <% if (customerPhone) { %>
+                    <div class="order-meta-row">
+                        <span>Mobile Number:</span>
+                        <span class="text-dark"><%= customerPhone %></span>
+                    </div>
+                <% } %>
+
+                <!-- Amount -->
+                <div class="amount-row">
+                    <span class="amount-label">Amount to Pay</span>
+                    <span class="amount-value">₹<%= parseInt(order.total_amount) %></span>
+                </div>
+
+                <!-- Actions -->
+                <button class="btn-payment-action btn-pay-securely" id="btnPaySecurely">
+                    <i class="bi bi-credit-card-2-front-fill"></i> Pay Securely
+                </button>
+
+                <button class="btn-payment-action btn-payment-cancel" id="btnPayCancel">
+                    <i class="bi bi-arrow-left"></i> Cancel Payment & Return
+                </button>
+
+                <div class="secured-badge">
+                    <i class="bi bi-patch-check-fill text-success"></i> 
+                    <span>SSL Secured 256-bit Razorpay Integration</span>
+                </div>
             </div>
-
-            <div class="order-meta-row">
-                <span>Payment Method:</span>
-                <span class="text-dark text-uppercase"><%= order.payment_method %></span>
-            </div>
-
-            <!-- Amount -->
-            <div class="amount-row">
-                <span class="amount-label">Amount to Pay</span>
-                <span class="amount-value">₹<%= parseInt(order.total_amount) %></span>
-            </div>
-
-            <!-- Payment Methods Icons -->
-            <div class="payment-methods-logos">
-                <i class="bi bi-credit-card"></i>
-                <i class="bi bi-wallet2"></i>
-                <i class="bi bi-bank"></i>
-            </div>
-
-            <!-- Action buttons -->
-            <button class="btn-payment-action btn-payment-success" id="btnPaySuccess">
-                <i class="bi bi-check-circle-fill me-1"></i> Simulate Payment Success
-            </button>
-
-            <button class="btn-payment-action btn-payment-fail" id="btnPayFail">
-                <i class="bi bi-x-circle-fill me-1"></i> Simulate Payment Failure
-            </button>
-
-            <button class="btn-payment-action btn-payment-cancel" id="btnPayCancel">
-                Cancel Transaction
-            </button>
-
-            <div class="text-center mt-3">
-                <small class="text-muted" style="font-size: 11px;">
-                    <i class="bi bi-lock-fill"></i> SSL Secured 256-bit Encryption
-                </small>
-            </div>
-
         </div>
     </div>
-</div>
 
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script>
-$(document).ready(function() {
-    
-    const orderId = <%= order.id %>;
+    <!-- FOOTER -->
+    <%- include('../partials/footer') %>
 
-    function processPayment(status) {
-        // Disable buttons
-        $(".btn-payment-action").prop("disabled", true);
-        if (status === 'success') {
-            $("#btnPaySuccess").text("Processing transaction...");
-        } else {
-            $("#btnPayFail").text("Cancelling transaction...");
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        const internalOrderId = <%= order.id %>;
+        const customerName = "<%= customerName %>";
+        const customerEmail = "<%= customerEmail %>";
+        const customerPhone = "<%= customerPhone %>";
+
+        function showAlert(message, type = 'danger') {
+            const html = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert" style="border-radius: 12px; font-weight: 600; font-size: 14px;">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            $("#paymentAlertContainer").html(html);
         }
 
-        $.ajax({
-            url: "/checkout/payment/callback",
-            method: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({ orderId, status }),
-            success: function(data) {
-                if (data.success && data.redirectUrl) {
-                    window.location.href = data.redirectUrl;
-                } else {
-                    alert(data.message || "Failed to process transaction.");
-                    $(".btn-payment-action").prop("disabled", false);
-                    restoreButtonsText();
+        const payButton = document.getElementById("btnPaySecurely");
+        const cancelButton = document.getElementById("btnPayCancel");
+
+        if (payButton) {
+            payButton.addEventListener("click", async function(e) {
+                e.preventDefault();
+
+                // Check if Razorpay SDK loaded
+                if (typeof Razorpay === "undefined") {
+                    console.error("Razorpay Checkout SDK failed to load");
+                    showAlert("Payment gateway could not be loaded. Please refresh and try again.", "danger");
+                    return;
                 }
-            },
-            error: function() {
-                alert("Network communication error.");
-                $(".btn-payment-action").prop("disabled", false);
-                restoreButtonsText();
-            }
+
+                // Prevent multiple clicks
+                payButton.disabled = true;
+                payButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Opening Secure Payment...';
+                if (cancelButton) cancelButton.disabled = true;
+
+                try {
+                    // 1. Fetch backend to create Razorpay Order
+                    const response = await fetch('/checkout/create-razorpay-order', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            orderId: internalOrderId
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const text = await response.text();
+                        console.error("[Razorpay] Server error:", text);
+                        throw new Error("Payment order creation failed: " + text);
+                    }
+
+                    const data = await response.json();
+
+                    if (!data.success) {
+                        throw new Error(data.message || "Could not initiate payment");
+                    }
+
+                    if (data.alreadyPaid) {
+                        window.location.href = data.redirectUrl;
+                        return;
+                    }
+
+                    // 2. Open Razorpay Checkout directly in the click callback flow
+                    const options = {
+                        key: data.key,
+                        amount: data.amount,
+                        currency: data.currency,
+                        name: "Drinkit",
+                        description: "Drinkit Order Payment",
+                        order_id: data.orderId,
+                        prefill: {
+                            name: customerName,
+                            email: customerEmail,
+                            contact: customerPhone
+                        },
+                        theme: {
+                            color: "#7d1735"
+                        },
+                        modal: {
+                            ondismiss: function() {
+                                console.log("Razorpay checkout closed");
+                                showAlert("Payment window closed. You can retry paying securely.", "warning");
+                                payButton.disabled = false;
+                                payButton.innerHTML = '<i class="bi bi-credit-card-2-front-fill"></i> Pay Securely';
+                                if (cancelButton) cancelButton.disabled = false;
+                            }
+                        },
+                        handler: async function(paymentResponse) {
+                            console.log("Razorpay payment response:", paymentResponse);
+                            payButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Verifying Transaction...';
+                            
+                            try {
+                                const verifyResponse = await fetch('/checkout/verify-payment', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        internal_order_id: internalOrderId,
+                                        razorpay_order_id: paymentResponse.razorpay_order_id,
+                                        razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                                        razorpay_signature: paymentResponse.razorpay_signature
+                                    })
+                                });
+
+                                const result = await verifyResponse.json();
+
+                                if (result.success) {
+                                    window.location.href = '/checkout/success/' + internalOrderId;
+                                } else {
+                                    showAlert(result.message || 'Payment verification failed', "danger");
+                                    payButton.disabled = false;
+                                    payButton.innerHTML = '<i class="bi bi-credit-card-2-front-fill"></i> Pay Securely';
+                                    if (cancelButton) cancelButton.disabled = false;
+                                }
+                            } catch (err) {
+                                showAlert("Verification connection failed.", "danger");
+                                payButton.disabled = false;
+                                payButton.innerHTML = '<i class="bi bi-credit-card-2-front-fill"></i> Pay Securely';
+                                if (cancelButton) cancelButton.disabled = false;
+                            }
+                        }
+                    };
+
+                    const rzp = new Razorpay(options);
+
+                    rzp.on('payment.failed', function(response) {
+                        console.error("Razorpay payment failed:", response.error);
+                        showAlert(response.error.description || "Payment failed. Please try again.", "danger");
+                        payButton.disabled = false;
+                        payButton.innerHTML = '<i class="bi bi-credit-card-2-front-fill"></i> Pay Securely';
+                        if (cancelButton) cancelButton.disabled = false;
+                    });
+
+                    rzp.open();
+
+                } catch (err) {
+                    console.error("Payment initiation error:", err);
+                    showAlert("Could not initiate payment. Try again.", "danger");
+                    payButton.disabled = false;
+                    payButton.innerHTML = '<i class="bi bi-credit-card-2-front-fill"></i> Pay Securely';
+                    if (cancelButton) cancelButton.disabled = false;
+                }
+            });
+        }
+
+        $("#btnPayCancel").on("click", function() {
+            const cancelBtn = $(this);
+            const payBtn = $("#btnPaySecurely");
+
+            cancelBtn.prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Cancelling...');
+            if (payBtn.length) payBtn.prop("disabled", true);
+
+            $.ajax({
+                url: "/checkout/payment/cancel",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ orderId: internalOrderId }),
+                success: function(data) {
+                    if (data.success && data.redirectUrl) {
+                        window.location.href = data.redirectUrl;
+                    } else {
+                        showAlert("Cancellation failed.");
+                        cancelBtn.prop("disabled", false).html('<i class="bi bi-arrow-left"></i> Cancel Payment & Return');
+                        if (payBtn.length) payBtn.prop("disabled", false);
+                    }
+                },
+                error: function() {
+                    showAlert("Network error during cancellation.");
+                    cancelBtn.prop("disabled", false).html('<i class="bi bi-arrow-left"></i> Cancel Payment & Return');
+                    if (payBtn.length) payBtn.prop("disabled", false);
+                }
+            });
         });
-    }
-
-    function restoreButtonsText() {
-        $("#btnPaySuccess").html('<i class="bi bi-check-circle-fill me-1"></i> Simulate Payment Success');
-        $("#btnPayFail").html('<i class="bi bi-x-circle-fill me-1"></i> Simulate Payment Failure');
-    }
-
-    $("#btnPaySuccess").on("click", function() {
-        processPayment("success");
     });
-
-    $("#btnPayFail, #btnPayCancel").on("click", function() {
-        processPayment("failed");
-    });
-
-});
-</script>
+    </script>
 </body>
 </html>
