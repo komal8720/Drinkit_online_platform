@@ -225,9 +225,14 @@ app.set(
 const userRouter = require("./routes/userRouter");
 const authRouter = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
-app.use("/", userRouter);
+const vendorRouter = require("./routes/vendorRouter");
+const deliveryRouter = require("./routes/deliveryRouter");
+
 app.use("/auth", authRouter);
 app.use("/admin", adminRoutes);
+app.use("/vendor", vendorRouter);
+app.use("/delivery", deliveryRouter);
+app.use("/", userRouter);
 
 
 // ==========================================================

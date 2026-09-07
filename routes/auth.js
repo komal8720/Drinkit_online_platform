@@ -6,6 +6,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const { pool } = require("../config/db");
 const { sendOtpEmail } = require("../services/mail.service");
+const ROLES = require("../config/roles");
 
 const router = express.Router();
 
@@ -213,11 +214,31 @@ router.post("/verify-otp", async (req, res) => {
 // ==========================================================
 
 router.post("/register", async (req, res) => {
+    // Explicitly destructure only allowed registration fields
+    // NEVER accept or trust req.body.role_id from client
     const { first_name, last_name, email, mobile, password, confirm_password } = req.body;
 
     try {
-        if (!first_name || !email || !password || !confirm_password) {
-            req.flash("error", "Please fill in all required fields.");
+        // 1. Backend validation for required fields
+        if (!first_name || !first_name.trim()) {
+            req.flash("error", "First name is required.");
+            return res.redirect("/auth/register");
+        }
+
+        if (!email || !email.trim()) {
+            req.flash("error", "Email address is required.");
+            return res.redirect("/auth/register");
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const normalizedEmail = email.trim().toLowerCase();
+        if (!emailRegex.test(normalizedEmail)) {
+            req.flash("error", "Please provide a valid email address.");
+            return res.redirect("/auth/register");
+        }
+
+        if (!password || password.length < 6) {
+            req.flash("error", "Password must be at least 6 characters long.");
             return res.redirect("/auth/register");
         }
 
@@ -226,15 +247,24 @@ router.post("/register", async (req, res) => {
             return res.redirect("/auth/register");
         }
 
-        const normalizedEmail = email.trim().toLowerCase();
+        // Mobile validation if provided
+        let formattedMobile = null;
+        if (mobile && mobile.trim()) {
+            formattedMobile = mobile.trim();
+            const mobileRegex = /^[0-9+\s\-]{7,20}$/;
+            if (!mobileRegex.test(formattedMobile)) {
+                req.flash("error", "Please enter a valid mobile number.");
+                return res.redirect("/auth/register");
+            }
+        }
 
-        // 1. Enforce OTP verification security check
+        // 2. Enforce OTP verification security check
         if (!req.session.emailOtpVerified || req.session.emailOtpVerified !== normalizedEmail) {
             req.flash("error", "Please verify your email address via OTP first.");
             return res.redirect("/auth/register");
         }
 
-        // 2. Check if email already exists
+        // 3. Check if email already exists
         const [existingUsers] = await pool.query(
             "SELECT id FROM users WHERE email = ? LIMIT 1",
             [normalizedEmail]
@@ -245,11 +275,11 @@ router.post("/register", async (req, res) => {
             return res.redirect("/auth/register");
         }
 
-        // 3. Check if mobile already exists (if provided)
-        if (mobile && mobile.trim()) {
+        // 4. Check if mobile already exists (if provided)
+        if (formattedMobile) {
             const [existingMobile] = await pool.query(
                 "SELECT id FROM users WHERE mobile = ? LIMIT 1",
-                [mobile.trim()]
+                [formattedMobile]
             );
 
             if (existingMobile.length > 0) {
@@ -258,17 +288,28 @@ router.post("/register", async (req, res) => {
             }
         }
 
-        // Hash password
+        // 5. Hash password securely using bcrypt
         const saltRounds = 10;
         const passwordHash = await bcrypt.hash(password, saltRounds);
 
-        // Insert into database (Default role_id = 1 for Customer, status = 'active')
+        // 6. Secure server-side role assignment: ALWAYS CUSTOMER (role_id = 3)
+        // Public registration can NEVER create an admin or vendor account
+        const CUSTOMER_ROLE_ID = ROLES.CUSTOMER;
+
         await pool.query(
             "INSERT INTO users (role_id, first_name, last_name, email, mobile, password_hash, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            [1, first_name.trim(), last_name ? last_name.trim() : null, normalizedEmail, mobile ? mobile.trim() : null, passwordHash, "active"]
+            [
+                CUSTOMER_ROLE_ID,
+                first_name.trim(),
+                last_name ? last_name.trim() : null,
+                normalizedEmail,
+                formattedMobile,
+                passwordHash,
+                "active"
+            ]
         );
 
-        // Clear OTP states after successful registration
+        // 7. Clear OTP states after successful registration
         req.session.emailOtp = null;
         req.session.emailOtpVerified = null;
 

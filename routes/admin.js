@@ -7,6 +7,7 @@ const bcrypt = require("bcrypt");
 const { pool } = require("../config/db");
 const requireAdmin = require("../middleware/adminAuth");
 const upload = require("../middleware/upload");
+const ROLES = require("../config/roles");
 
 const router = express.Router();
 
@@ -64,7 +65,7 @@ router.post("/login", async (req, res) => {
 
         const user = users[0];
 
-        if (user.role_id !== 1) {
+        if (Number(user.role_id) !== ROLES.SUPER_ADMIN) {
             return res.render("admin/login", {
                 title: "Admin Login",
                 error: "Access denied. Authorized administrators only."
@@ -139,7 +140,7 @@ router.get("/dashboard", requireAdmin, async (req, res) => {
         // 1. Fetch statistics
         const [[{ totalProducts }]] = await pool.query("SELECT COUNT(*) as totalProducts FROM products");
         const [[{ totalOrders }]] = await pool.query("SELECT COUNT(*) as totalOrders FROM orders");
-        const [[{ totalCustomers }]] = await pool.query("SELECT COUNT(*) as totalCustomers FROM users WHERE role_id = 3");
+        const [[{ totalCustomers }]] = await pool.query("SELECT COUNT(*) as totalCustomers FROM users WHERE role_id = ?", [ROLES.CUSTOMER]);
         const [[{ totalRevenue }]] = await pool.query("SELECT COALESCE(SUM(total_amount), 0) as totalRevenue FROM orders WHERE payment_status = 'paid'");
 
         // 2. Fetch category overview (product count per category)
@@ -595,10 +596,10 @@ router.get("/customers", requireAdmin, async (req, res) => {
             SELECT u.*, COUNT(o.id) as order_count, COALESCE(SUM(o.total_amount), 0) as total_spent
             FROM users u
             LEFT JOIN orders o ON u.id = o.customer_id AND o.payment_status = 'paid'
-            WHERE u.role_id = 3
+            WHERE u.role_id = ?
             GROUP BY u.id
             ORDER BY u.created_at DESC
-        `);
+        `, [ROLES.CUSTOMER]);
 
         res.render("admin/customers", {
             title: "Customers Directory",
