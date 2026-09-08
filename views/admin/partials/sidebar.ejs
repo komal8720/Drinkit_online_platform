@@ -52,10 +52,36 @@
         <div class="sidebar-section-title">
             Business
         </div>
-        <a href="/admin/vendors" class="sidebar-link <%= currentPage === 'vendors' ? 'active' : '' %>">
-            <i class="bi bi-shop"></i>
-            <span>Vendors</span>
-        </a>
+        <% const isVendorActive = typeof currentPage !== 'undefined' && currentPage && currentPage.startsWith('vendor'); %>
+        <div class="sidebar-dropdown <%= isVendorActive ? 'open' : '' %>" id="vendorDropdown">
+            <button type="button" class="sidebar-dropdown-toggle <%= isVendorActive ? 'active' : '' %>" onclick="document.getElementById('vendorDropdown').classList.toggle('open')">
+                <i class="bi bi-shop"></i>
+                <span>Vendors</span>
+                <i class="bi bi-chevron-down chevron"></i>
+            </button>
+            <div class="sidebar-submenu">
+                <a href="/admin/vendors" class="sidebar-link <%= currentPage === 'vendors' ? 'active' : '' %>">
+                    <i class="bi bi-list-ul"></i>
+                    <span>All Vendors</span>
+                </a>
+                <a href="/admin/vendors/add" class="sidebar-link <%= currentPage === 'vendor-add' ? 'active' : '' %>">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Add New Vendor</span>
+                </a>
+                <a href="/admin/vendors?verification_status=pending" class="sidebar-link <%= currentPage === 'vendor-verification' ? 'active' : '' %>">
+                    <i class="bi bi-patch-check"></i>
+                    <span>Vendor Verification</span>
+                </a>
+                <a href="/admin/vendors/commissions" class="sidebar-link <%= currentPage === 'vendor-commissions' ? 'active' : '' %>">
+                    <i class="bi bi-percent"></i>
+                    <span>Vendor Commission</span>
+                </a>
+                <a href="/admin/vendors/reports" class="sidebar-link <%= currentPage === 'vendor-reports' ? 'active' : '' %>">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    <span>Vendor Reports</span>
+                </a>
+            </div>
+        </div>
         <a href="/admin/payments" class="sidebar-link <%= currentPage === 'payments' ? 'active' : '' %>">
             <i class="bi bi-credit-card"></i>
             <span>Payments</span>

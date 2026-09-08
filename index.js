@@ -15,6 +15,7 @@ const morgan = require("morgan");
 
 const fs = require("fs");
 const { pool, testConnection } = require("./config/db");
+const csrfProtection = require("./middleware/csrf");
 
 // Load translation files
 const locales = {
@@ -128,6 +129,7 @@ app.use(
 app.use(flash());
 
 
+
 // ==========================================================
 // GLOBAL VARIABLES FOR EJS
 // ==========================================================
@@ -201,6 +203,10 @@ app.use(async (req, res, next) => {
 
     next();
 });
+
+// CSRF PROTECTION (After global variables so error views have locals)
+// ==========================================================
+app.use(csrfProtection);
 
 
 // ==========================================================
@@ -427,7 +433,11 @@ async function startServer() {
 
 
 // ==========================================================
-// RUN SERVER
+// RUN SERVER & EXPORT
 // ==========================================================
 
-startServer();
+module.exports = app;
+
+if (require.main === module) {
+    startServer();
+}

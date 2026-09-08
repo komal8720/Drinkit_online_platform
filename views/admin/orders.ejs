@@ -146,6 +146,7 @@
                                             <td>
                                                 <div class="d-flex justify-content-end">
                                                     <form action="/admin/orders/<%= order.id %>/status" method="POST" class="d-inline-flex gap-2">
+                                                        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : (locals.csrfToken || '') %>">
                                                         <select name="order_status" class="form-control form-control-sm" style="width: auto; padding: 4px 10px; font-size: 0.8rem; border-radius: var(--radius-sm);" onchange="this.form.submit()">
                                                             <option value="pending" <%= order.order_status === 'pending' ? 'selected' : '' %>>Pending</option>
                                                             <option value="confirmed" <%= order.order_status === 'confirmed' ? 'selected' : '' %>>Confirmed</option>

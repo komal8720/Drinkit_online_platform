@@ -31,32 +31,102 @@
             <div class="admin-breadcrumb">
                 <a href="/admin/dashboard">Admin</a>
                 <i class="bi bi-chevron-right"></i>
-                <strong>Vendors</strong>
+                <a href="/admin/vendors">Vendors</a>
+                <i class="bi bi-chevron-right"></i>
+                <strong>All Vendors</strong>
             </div>
 
+            <!-- FLASH NOTIFICATIONS -->
+            <% if (typeof success_msg !== 'undefined' && success_msg && success_msg.length > 0) { %>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i><%= success_msg %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+            <% if (typeof error_msg !== 'undefined' && error_msg && error_msg.length > 0) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i><%= error_msg %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+
             <!-- PAGE HEADER -->
-            <div class="mb-4">
-                <h1 class="fw-bold mb-1" style="font-size: 1.75rem; letter-spacing: -0.5px;">Vendors</h1>
-                <p class="text-muted mb-0 small">Approve and verify beverage shops, vendor details, and trade licenses</p>
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                <div>
+                    <h1 class="fw-bold mb-1" style="font-size: 1.75rem; letter-spacing: -0.5px;">Vendor Management</h1>
+                    <p class="text-muted mb-0 small">Approve, monitor, and configure beverage shop vendors across the Drinkit network</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="/admin/vendors/add" class="btn btn-primary d-inline-flex align-items-center gap-2" style="background-color: var(--primary); border-color: var(--primary); border-radius: var(--radius-md);">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>Add New Vendor</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- SEARCH & FILTERS CARD -->
+            <div class="dashboard-card mb-4">
+                <div class="dashboard-card-body p-3">
+                    <form method="GET" action="/admin/vendors" class="row g-3 align-items-center">
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-muted">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" name="search" class="form-control border-start-0" placeholder="Search by shop name, owner, email, mobile..." value="<%= search || '' %>">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="status" class="form-select">
+                                <option value="all" <%= statusFilter === 'all' ? 'selected' : '' %>>All Account Statuses</option>
+                                <option value="active" <%= statusFilter === 'active' ? 'selected' : '' %>>Active</option>
+                                <option value="inactive" <%= statusFilter === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                                <option value="suspended" <%= statusFilter === 'suspended' ? 'selected' : '' %>>Suspended</option>
+                                <option value="pending" <%= statusFilter === 'pending' ? 'selected' : '' %>>Pending Setup</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="verification_status" class="form-select">
+                                <option value="all" <%= verificationFilter === 'all' ? 'selected' : '' %>>All Verifications</option>
+                                <option value="pending" <%= verificationFilter === 'pending' ? 'selected' : '' %>>Pending Review</option>
+                                <option value="approved" <%= verificationFilter === 'approved' ? 'selected' : '' %>>Approved</option>
+                                <option value="rejected" <%= verificationFilter === 'rejected' ? 'selected' : '' %>>Rejected</option>
+                                <option value="suspended" <%= verificationFilter === 'suspended' ? 'selected' : '' %>>Suspended</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 d-flex gap-2">
+                            <button type="submit" class="btn btn-secondary w-100" title="Apply Filter">
+                                <i class="bi bi-funnel"></i>
+                            </button>
+                            <% if (search || statusFilter !== 'all' || verificationFilter !== 'all') { %>
+                                <a href="/admin/vendors" class="btn btn-outline-secondary" title="Clear Filters">
+                                    <i class="bi bi-x-lg"></i>
+                                </a>
+                            <% } %>
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <!-- VENDORS TABLE CARD -->
             <div class="dashboard-card">
-                <div class="dashboard-card-header">
-                    <span class="dashboard-card-title">Beverage Shop Vendors</span>
+                <div class="dashboard-card-header d-flex justify-content-between align-items-center">
+                    <span class="dashboard-card-title">Beverage Shop Vendors (<%= totalVendors %>)</span>
                 </div>
                 <div class="dashboard-card-body p-0">
                     <% if (vendors && vendors.length > 0) { %>
                         <div class="table-responsive">
-                            <table class="table custom-table mb-0">
+                            <table class="table custom-table mb-0 align-middle">
                                 <thead>
                                     <tr>
                                         <th>Shop / Business</th>
-                                        <th>Owner Name</th>
-                                        <th>Contact</th>
-                                        <th>License Number</th>
-                                        <th>Verification Status</th>
-                                        <th class="text-end">Verification Action</th>
+                                        <th>Owner & Credentials</th>
+                                        <th>Contact Details</th>
+                                        <th>License / City</th>
+                                        <th>Verification</th>
+                                        <th>Account Status</th>
+                                        <th>Commission</th>
+                                        <th class="text-end">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -64,38 +134,116 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center gap-3">
-                                                    <div class="sidebar-brand-icon" style="background-color: var(--primary-light); color: var(--primary); box-shadow: none;">
+                                                    <div class="sidebar-brand-icon" style="background-color: var(--primary-light); color: var(--primary); box-shadow: none; width: 40px; height: 40px; font-size: 1.25rem;">
                                                         <i class="bi bi-shop"></i>
                                                     </div>
                                                     <div>
-                                                        <div class="fw-bold"><%= v.business_name %></div>
-                                                        <span class="text-muted small">ID: #<%= v.id %></span>
+                                                        <div class="fw-bold">
+                                                            <a href="/admin/vendors/<%= v.id %>" class="text-decoration-none text-dark hover-primary"><%= v.business_name %></a>
+                                                        </div>
+                                                        <span class="text-muted small">Vendor #<%= v.id %> &bull; <%= v.product_count || 0 %> products</span>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td><%= v.owner_name %></td>
                                             <td>
-                                                <div><%= v.email %></div>
-                                                <% if (v.mobile) { %>
-                                                    <div class="text-muted small mt-1"><i class="bi bi-phone me-1"></i><%= v.mobile %></div>
+                                                <div class="fw-semibold"><%= v.owner_name %></div>
+                                                <div class="text-muted small">
+                                                    <span class="badge bg-light text-secondary border">@<%= v.username || 'unassigned' %></span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div><i class="bi bi-envelope me-1 text-muted"></i><%= v.business_email || v.email %></div>
+                                                <% if (v.business_mobile || v.mobile) { %>
+                                                    <div class="text-muted small mt-1"><i class="bi bi-phone me-1"></i><%= v.business_mobile || v.mobile %></div>
                                                 <% } %>
                                             </td>
                                             <td>
-                                                <code><%= v.license_number || 'N/A' %></code>
+                                                <div><code><%= v.license_number || 'N/A' %></code></div>
+                                                <div class="text-muted small"><%= v.city ? (v.city + ', ' + (v.state || '')) : 'Address unlisted' %></div>
                                             </td>
                                             <td>
-                                                <span class="badge <%= v.verification_status %>"><%= v.verification_status %></span>
+                                                <% if (v.verification_status === 'approved') { %>
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="bi bi-check-circle me-1"></i>Approved</span>
+                                                <% } else if (v.verification_status === 'pending') { %>
+                                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1"><i class="bi bi-clock-history me-1"></i>Pending</span>
+                                                <% } else if (v.verification_status === 'rejected') { %>
+                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+                                                <% } else { %>
+                                                    <span class="badge bg-secondary-subtle text-secondary border px-2 py-1"><%= v.verification_status %></span>
+                                                <% } %>
                                             </td>
                                             <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <form action="/admin/vendors/<%= v.id %>/verify" method="POST" class="d-inline-flex gap-2">
-                                                        <select name="status" class="form-control form-control-sm" style="width: auto; padding: 4px 10px; font-size: 0.8rem; border-radius: var(--radius-sm);" onchange="this.form.submit()">
-                                                            <option value="pending" <%= v.verification_status === 'pending' ? 'selected' : '' %>>Pending</option>
-                                                            <option value="approved" <%= v.verification_status === 'approved' ? 'selected' : '' %>>Approved</option>
-                                                            <option value="rejected" <%= v.verification_status === 'rejected' ? 'selected' : '' %>>Rejected</option>
-                                                            <option value="suspended" <%= v.verification_status === 'suspended' ? 'selected' : '' %>>Suspended</option>
-                                                        </select>
-                                                    </form>
+                                                <% if (v.status === 'active') { %>
+                                                    <span class="badge bg-success text-white px-2 py-1">Active</span>
+                                                <% } else if (v.status === 'pending') { %>
+                                                    <span class="badge bg-warning text-dark px-2 py-1">Pending Setup</span>
+                                                <% } else if (v.status === 'suspended') { %>
+                                                    <span class="badge bg-danger text-white px-2 py-1">Suspended</span>
+                                                <% } else { %>
+                                                    <span class="badge bg-secondary text-white px-2 py-1">Inactive</span>
+                                                <% } %>
+                                            </td>
+                                            <td>
+                                                <span class="fw-semibold"><%= v.commission_rate || '10.00' %>%</span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex justify-content-end gap-1">
+                                                    <a href="/admin/vendors/<%= v.id %>" class="btn btn-sm btn-outline-secondary" title="View Profile">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a href="/admin/vendors/<%= v.id %>/edit" class="btn btn-sm btn-outline-primary" title="Edit Vendor">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <% if (v.has_pending_activation) { %>
+                                                        <form action="/admin/vendors/<%= v.id %>/resend-invitation" method="POST" class="d-inline" onsubmit="return confirm('Resend activation invitation email to <%= v.business_email || v.email %>?')">
+                                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                            <button type="submit" class="btn btn-sm btn-outline-warning" title="Resend Activation Email">
+                                                                <i class="bi bi-envelope-paper"></i>
+                                                            </button>
+                                                        </form>
+                                                    <% } %>
+                                                    <!-- Quick Verify Modal Toggle or Dropdown -->
+                                                    <div class="dropdown d-inline">
+                                                        <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="bi bi-three-dots-vertical"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                            <li><h6 class="dropdown-header">Verification Status</h6></li>
+                                                            <li>
+                                                                <form action="/admin/vendors/<%= v.id %>/verify" method="POST">
+                                                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                                    <input type="hidden" name="status" value="approved">
+                                                                    <button class="dropdown-item text-success"><i class="bi bi-check2-circle me-2"></i>Approve</button>
+                                                                </form>
+                                                            </li>
+                                                            <li>
+                                                                <form action="/admin/vendors/<%= v.id %>/verify" method="POST">
+                                                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                                    <input type="hidden" name="status" value="rejected">
+                                                                    <button class="dropdown-item text-danger"><i class="bi bi-x-circle me-2"></i>Reject</button>
+                                                                </form>
+                                                            </li>
+                                                            <li><hr class="dropdown-divider"></li>
+                                                            <li><h6 class="dropdown-header">Account State</h6></li>
+                                                            <li>
+                                                                <form action="/admin/vendors/<%= v.id %>/status" method="POST">
+                                                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                                    <input type="hidden" name="status" value="<%= v.status === 'active' ? 'inactive' : 'active' %>">
+                                                                    <button class="dropdown-item">
+                                                                        <i class="bi <%= v.status === 'active' ? 'bi-pause-circle text-warning' : 'bi-play-circle text-success' %> me-2"></i>
+                                                                        <%= v.status === 'active' ? 'Deactivate' : 'Activate' %>
+                                                                    </button>
+                                                                </form>
+                                                            </li>
+                                                            <li>
+                                                                <form action="/admin/vendors/<%= v.id %>/status" method="POST">
+                                                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                                    <input type="hidden" name="status" value="suspended">
+                                                                    <button class="dropdown-item text-danger"><i class="bi bi-slash-circle me-2"></i>Suspend Store</button>
+                                                                </form>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -103,10 +251,36 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- PAGINATION -->
+                        <% if (totalPages > 1) { %>
+                            <div class="d-flex justify-content-between align-items-center p-3 border-top">
+                                <div class="text-muted small">
+                                    Showing page <%= currentPageNum %> of <%= totalPages %> (<%= totalVendors %> total vendors)
+                                </div>
+                                <nav aria-label="Page navigation">
+                                    <ul class="pagination pagination-sm mb-0">
+                                        <li class="page-item <%= currentPageNum <= 1 ? 'disabled' : '' %>">
+                                            <a class="page-link" href="?page=<%= currentPageNum - 1 %>&search=<%= search || '' %>&status=<%= statusFilter %>&verification_status=<%= verificationFilter %>">Previous</a>
+                                        </li>
+                                        <% for (let p = 1; p <= totalPages; p++) { %>
+                                            <li class="page-item <%= p === currentPageNum ? 'active' : '' %>">
+                                                <a class="page-link" href="?page=<%= p %>&search=<%= search || '' %>&status=<%= statusFilter %>&verification_status=<%= verificationFilter %>"><%= p %></a>
+                                            </li>
+                                        <% } %>
+                                        <li class="page-item <%= currentPageNum >= totalPages ? 'disabled' : '' %>">
+                                            <a class="page-link" href="?page=<%= currentPageNum + 1 %>&search=<%= search || '' %>&status=<%= statusFilter %>&verification_status=<%= verificationFilter %>">Next</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        <% } %>
+
                     <% } else { %>
-                        <div class="empty-state py-5">
-                            <i class="bi bi-shop"></i>
-                            <p class="mb-0">No beverage vendors found in the database.</p>
+                        <div class="empty-state py-5 text-center">
+                            <i class="bi bi-shop display-4 text-muted"></i>
+                            <p class="mt-3 text-muted">No vendors found matching the current criteria.</p>
+                            <a href="/admin/vendors/add" class="btn btn-sm btn-primary mt-2">Add First Vendor</a>
                         </div>
                     <% } %>
                 </div>
@@ -117,7 +291,8 @@
         <%- include("partials/footer") %>
     </main>
 
-    <!-- SIDEBAR SCRIPT -->
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const sidebar = document.getElementById("adminSidebar");
         const adminMain = document.getElementById("adminMain");
@@ -125,8 +300,8 @@
 
         const isCollapsed = localStorage.getItem("adminSidebarCollapsed") === "true";
         if (isCollapsed) {
-            sidebar.classList.add("collapsed");
-            adminMain.classList.add("expanded");
+            sidebar?.classList.add("collapsed");
+            adminMain?.classList.add("expanded");
         }
 
         sidebarToggle?.addEventListener("click", () => {

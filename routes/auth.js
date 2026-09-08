@@ -325,6 +325,181 @@ router.post("/register", async (req, res) => {
 
 
 // ==========================================================
+// GET SETUP PASSWORD PAGE
+// ==========================================================
+
+router.get("/setup-password", (req, res) => {
+    if (req.session && req.session.user) {
+        return res.redirect("/");
+    }
+
+    res.render("user/setup-password", {
+        title: "Set Password - Drinkit"
+    });
+});
+
+
+// ==========================================================
+// POST SEND SETUP OTP (For existing registered user / vendor)
+// ==========================================================
+
+router.post("/send-setup-otp", async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        if (!email || !email.trim()) {
+            return res.status(400).json({ success: false, message: "Email address is required." });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        // Check if email exists in database
+        const [users] = await pool.query(
+            "SELECT id, first_name FROM users WHERE email = ? LIMIT 1",
+            [normalizedEmail]
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({ success: false, message: "No account found with this email address." });
+        }
+
+        const user = users[0];
+
+        // Generate 6-digit OTP
+        const otpCode = String(Math.floor(100000 + Math.random() * 900000));
+
+        // Save in session with 5 minutes expiry
+        req.session.setupOtp = {
+            email: normalizedEmail,
+            otp: otpCode,
+            expiry: Date.now() + 5 * 60 * 1000
+        };
+
+        try {
+            await sendOtpEmail(normalizedEmail, user.first_name || "User", otpCode);
+        } catch (mailError) {
+            console.error("❌ Failed to send Setup OTP email via SMTP:", mailError.message);
+            console.log(`[SMTP FALLBACK] Setup OTP code for ${normalizedEmail}: ${otpCode}`);
+        }
+
+        return res.json({ success: true, message: "Verification OTP email sent successfully." });
+
+    } catch (error) {
+        console.error("❌ Send Setup OTP Error:", error);
+        return res.status(500).json({ success: false, message: "Internal server error requesting OTP." });
+    }
+});
+
+
+// ==========================================================
+// POST VERIFY SETUP OTP
+// ==========================================================
+
+router.post("/verify-setup-otp", async (req, res) => {
+    const { email, otp } = req.body;
+
+    try {
+        if (!email || !otp) {
+            return res.status(400).json({ success: false, message: "Email and OTP code are required." });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+        const sessionOtp = req.session.setupOtp;
+
+        if (!sessionOtp) {
+            return res.status(400).json({ success: false, message: "No OTP was requested for this session." });
+        }
+
+        if (sessionOtp.email !== normalizedEmail) {
+            return res.status(400).json({ success: false, message: "Email address mismatch." });
+        }
+
+        if (Date.now() > sessionOtp.expiry) {
+            return res.status(400).json({ success: false, message: "OTP code has expired." });
+        }
+
+        if (sessionOtp.otp !== otp.trim()) {
+            return res.status(400).json({ success: false, message: "Invalid OTP code." });
+        }
+
+        req.session.setupOtpVerified = normalizedEmail;
+        return res.json({ success: true, message: "Email verified successfully." });
+
+    } catch (error) {
+        console.error("❌ Verify Setup OTP Error:", error);
+        return res.status(500).json({ success: false, message: "Internal server error verifying OTP." });
+    }
+});
+
+
+// ==========================================================
+// POST SETUP PASSWORD
+// ==========================================================
+
+router.post("/setup-password", async (req, res) => {
+    const { email, password, confirm_password } = req.body;
+
+    try {
+        if (!email || !password || !confirm_password) {
+            req.flash("error", "All fields are required.");
+            return res.redirect("/auth/setup-password");
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        if (password.length < 6) {
+            req.flash("error", "Password must be at least 6 characters long.");
+            return res.redirect("/auth/setup-password");
+        }
+
+        if (password !== confirm_password) {
+            req.flash("error", "Passwords do not match.");
+            return res.redirect("/auth/setup-password");
+        }
+
+        // Verify OTP was completed
+        if (!req.session.setupOtpVerified || req.session.setupOtpVerified !== normalizedEmail) {
+            req.flash("error", "Please verify your email address via OTP first.");
+            return res.redirect("/auth/setup-password");
+        }
+
+        // Check user exists
+        const [users] = await pool.query(
+            "SELECT id FROM users WHERE email = ? LIMIT 1",
+            [normalizedEmail]
+        );
+
+        if (users.length === 0) {
+            req.flash("error", "Account not found.");
+            return res.redirect("/auth/setup-password");
+        }
+
+        // Hash password
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(password, saltRounds);
+
+        // Update password
+        await pool.query(
+            "UPDATE users SET password_hash = ?, updated_at = NOW() WHERE email = ?",
+            [passwordHash, normalizedEmail]
+        );
+
+        // Clear setup OTP session states
+        req.session.setupOtp = null;
+        req.session.setupOtpVerified = null;
+
+        req.flash("success", "Password updated successfully! Please login with your new password.");
+        return res.redirect("/auth/login");
+
+    } catch (error) {
+        console.error("❌ Setup Password Error:", error);
+        req.flash("error", "Failed to update password. Please try again.");
+        return res.redirect("/auth/setup-password");
+    }
+});
+
+
+// ==========================================================
 // GET LOGOUT
 // ==========================================================
 

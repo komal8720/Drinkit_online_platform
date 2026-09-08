@@ -1,0 +1,80 @@
+<aside class="admin-sidebar" id="vendorSidebar">
+    <!-- BRAND -->
+    <div class="sidebar-brand" style="border-bottom: 1px solid var(--border-color);">
+        <a href="/vendor/dashboard">
+            <div class="sidebar-brand-icon">
+                <i class="bi bi-shop"></i>
+            </div>
+            <div class="sidebar-brand-name">
+                Drink<span>it</span> <small class="text-muted fs-6 fw-normal">Vendor</small>
+            </div>
+        </a>
+    </div>
+
+    <!-- MENU -->
+    <nav class="sidebar-menu">
+        <!-- OVERVIEW -->
+        <div class="sidebar-section-title">Store Overview</div>
+        <a href="/vendor/dashboard" class="sidebar-link <%= currentPage === 'dashboard' ? 'active' : '' %>">
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <!-- INVENTORY / CATALOG -->
+        <div class="sidebar-section-title">Catalog & Inventory</div>
+        <a href="/vendor/products" class="sidebar-link <%= currentPage === 'products' ? 'active' : '' %>">
+            <i class="bi bi-box-seam"></i>
+            <span>My Products</span>
+        </a>
+        <a href="/vendor/products/add" class="sidebar-link <%= currentPage === 'product-add' ? 'active' : '' %>">
+            <i class="bi bi-plus-circle"></i>
+            <span>Add New Product</span>
+        </a>
+
+        <!-- SALES -->
+        <div class="sidebar-section-title">Orders & Fulfillment</div>
+        <a href="/vendor/orders" class="sidebar-link <%= currentPage === 'orders' ? 'active' : '' %>">
+            <i class="bi bi-bag-check"></i>
+            <span>Customer Orders</span>
+        </a>
+        <a href="/vendor/earnings" class="sidebar-link <%= currentPage === 'earnings' ? 'active' : '' %>">
+            <i class="bi bi-cash-stack"></i>
+            <span>Earnings & Payouts</span>
+        </a>
+        <a href="/vendor/reports" class="sidebar-link <%= currentPage === 'reports' ? 'active' : '' %>">
+            <i class="bi bi-bar-chart-line"></i>
+            <span>Sales Reports</span>
+        </a>
+
+        <!-- ACCOUNT -->
+        <div class="sidebar-section-title">Store Account</div>
+        <a href="/vendor/notifications" class="sidebar-link <%= currentPage === 'notifications' ? 'active' : '' %>">
+            <i class="bi bi-bell"></i>
+            <span>Notifications</span>
+            <% if (typeof unreadCount !== 'undefined' && unreadCount > 0) { %>
+                <span class="badge bg-danger rounded-pill ms-auto"><%= unreadCount %></span>
+            <% } %>
+        </a>
+        <a href="/vendor/profile" class="sidebar-link <%= currentPage === 'profile' ? 'active' : '' %>">
+            <i class="bi bi-person-gear"></i>
+            <span>Store Profile</span>
+        </a>
+        <a href="/vendor/logout" class="sidebar-link text-danger">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+        </a>
+    </nav>
+
+    <!-- BOTTOM STORE PROFILE CARD -->
+    <div class="sidebar-bottom">
+        <div class="sidebar-admin-profile">
+            <div class="admin-avatar" style="background-color: var(--primary); color: #fff;">
+                <%= (currentVendor && currentVendor.business_name ? currentVendor.business_name[0] : 'V').toUpperCase() %>
+            </div>
+            <div class="admin-info">
+                <strong><%= currentVendor ? currentVendor.business_name : 'Vendor Portal' %></strong>
+                <span class="text-success"><i class="bi bi-circle-fill text-success" style="font-size: 8px;"></i> <%= currentVendor ? currentVendor.verification_status : 'Active' %></span>
+            </div>
+        </div>
+    </div>
+</aside>

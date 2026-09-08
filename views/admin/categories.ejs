@@ -129,7 +129,8 @@
                             <span class="dashboard-card-title">Add Category</span>
                         </div>
                         <div class="dashboard-card-body">
-                            <form action="/admin/categories/add" method="POST" enctype="multipart/form-data">
+                            <form action="/admin/categories/add?_csrf=<%= csrfToken %>" method="POST" enctype="multipart/form-data">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                 <div class="form-group">
                                     <label class="form-label">Category Name *</label>
                                     <input type="text" name="name" class="form-control" placeholder="e.g. Wine, Soft Drinks" required>
@@ -176,6 +177,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="editCategoryForm" action="" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <div class="modal-body p-4">
                         <div class="form-group">
                             <label class="form-label">Category Name *</label>
@@ -243,7 +245,7 @@
                 const status = this.getAttribute('data-status');
                 const image = this.getAttribute('data-image');
 
-                document.getElementById('editCategoryForm').action = `/admin/categories/edit/${id}`;
+                document.getElementById('editCategoryForm').action = `/admin/categories/edit/${id}?_csrf=<%= csrfToken %>`;
                 document.getElementById('editCatName').value = name;
                 document.getElementById('editCatDesc').value = description || '';
                 document.getElementById('editCatStatus').value = status;

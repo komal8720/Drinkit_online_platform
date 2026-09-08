@@ -12,13 +12,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Custom Admin / Vendor CSS -->
+    <!-- Custom Admin CSS -->
     <link rel="stylesheet" href="/css/admin-layout.css">
 </head>
 
 <body>
     <!-- SIDEBAR -->
-    <%- include("partials/sidebar", { currentPage: "reports" }) %>
+    <%- include("partials/sidebar", { currentPage: "vendor-reports" }) %>
 
     <!-- MAIN -->
     <main class="admin-main" id="adminMain">
@@ -29,24 +29,26 @@
         <div class="admin-content">
             <!-- BREADCRUMB -->
             <div class="admin-breadcrumb">
-                <a href="/vendor/dashboard">Vendor Portal</a>
+                <a href="/admin/dashboard">Admin</a>
                 <i class="bi bi-chevron-right"></i>
-                <strong>Sales Reports</strong>
+                <a href="/admin/vendors">Vendors</a>
+                <i class="bi bi-chevron-right"></i>
+                <strong>Vendor Performance Reports</strong>
             </div>
 
-            <!-- HEADER -->
+            <!-- PAGE HEADER -->
             <div class="mb-4">
-                <h1 class="fw-bold mb-1" style="font-size: 1.75rem; letter-spacing: -0.5px;">Store Analytics &amp; Reports</h1>
-                <p class="text-muted mb-0 small">Analyze beverage sales volume, product performance, and gross margins</p>
+                <h1 class="fw-bold mb-1" style="font-size: 1.75rem; letter-spacing: -0.5px;">Vendor Reports & Analytics</h1>
+                <p class="text-muted mb-0 small">Comprehensive sales, earnings, and order velocity analytics grouped by vendor</p>
             </div>
 
-            <!-- PERIOD FILTER -->
+            <!-- DATE RANGE FILTER CARD -->
             <div class="dashboard-card mb-4">
                 <div class="dashboard-card-body p-3">
-                    <form method="GET" action="/vendor/reports" class="row g-3 align-items-end">
+                    <form method="GET" action="/admin/vendors/reports" class="row g-3 align-items-end">
                         <div class="col-md-3">
                             <label class="form-label small fw-semibold text-muted">Time Period</label>
-                            <select name="period" class="form-select" onchange="toggleDates(this.value)">
+                            <select name="period" class="form-select" onchange="toggleCustomDates(this.value)">
                                 <option value="today" <%= period === 'today' ? 'selected' : '' %>>Today</option>
                                 <option value="yesterday" <%= period === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
                                 <option value="7d" <%= period === '7d' ? 'selected' : '' %>>Last 7 Days</option>
@@ -56,23 +58,23 @@
                             </select>
                         </div>
                         <div class="col-md-3 custom-date-col" style="<%= period === 'custom' ? '' : 'display: none;' %>">
-                            <label class="form-label small fw-semibold text-muted">Start Date</label>
+                            <label class="form-label small fw-semibold text-muted">From Date</label>
                             <input type="date" name="start_date" class="form-control" value="<%= startDate || '' %>">
                         </div>
                         <div class="col-md-3 custom-date-col" style="<%= period === 'custom' ? '' : 'display: none;' %>">
-                            <label class="form-label small fw-semibold text-muted">End Date</label>
+                            <label class="form-label small fw-semibold text-muted">To Date</label>
                             <input type="date" name="end_date" class="form-control" value="<%= endDate || '' %>">
                         </div>
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-primary w-100" style="background-color: var(--primary); border-color: var(--primary);">
-                                <i class="bi bi-filter me-1"></i> Apply
+                                <i class="bi bi-filter me-1"></i> Apply Filter
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- METRIC STATS -->
+            <!-- SUMMARY STATS -->
             <div class="row g-3 mb-4">
                 <div class="col-sm-6 col-xl-3">
                     <div class="dashboard-card p-3">
@@ -83,55 +85,66 @@
                 </div>
                 <div class="col-sm-6 col-xl-3">
                     <div class="dashboard-card p-3">
-                        <span class="text-muted small fw-semibold d-block mb-1">UNITS SOLD</span>
-                        <h3 class="fw-bold mb-0"><%= totals.unitsSold %></h3>
-                        <span class="text-muted small">Total bottles / packs</span>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="dashboard-card p-3">
-                        <span class="text-muted small fw-semibold d-block mb-1">GROSS SALES</span>
+                        <span class="text-muted small fw-semibold d-block mb-1">TOTAL GROSS SALES</span>
                         <h3 class="fw-bold mb-0 text-success">₹<%= Number(totals.grossSales).toFixed(2) %></h3>
-                        <span class="text-muted small">Total item revenue</span>
+                        <span class="text-muted small">Order item revenues</span>
                     </div>
                 </div>
                 <div class="col-sm-6 col-xl-3">
                     <div class="dashboard-card p-3">
-                        <span class="text-muted small fw-semibold d-block mb-1">ESTIMATED NET PAYOUT</span>
-                        <h3 class="fw-bold mb-0 text-primary">₹<%= Number(totals.netPayout).toFixed(2) %></h3>
-                        <span class="text-muted small">After <%= currentVendor.commission_rate %>% commission</span>
+                        <span class="text-muted small fw-semibold d-block mb-1">COMMISSION EARNED</span>
+                        <h3 class="fw-bold mb-0 text-primary">₹<%= Number(totals.commissionEarned).toFixed(2) %></h3>
+                        <span class="text-muted small">Platform revenue share</span>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="dashboard-card p-3">
+                        <span class="text-muted small fw-semibold d-block mb-1">NET PAYABLE TO VENDORS</span>
+                        <h3 class="fw-bold mb-0 text-dark">₹<%= Number(totals.netPayable).toFixed(2) %></h3>
+                        <span class="text-muted small">Gross &minus; Commission</span>
                     </div>
                 </div>
             </div>
 
-            <!-- BEST SELLING PRODUCTS BREAKDOWN -->
+            <!-- REPORT DATA TABLE -->
             <div class="dashboard-card">
                 <div class="dashboard-card-header">
-                    <span class="dashboard-card-title">Beverage Sales Breakdown</span>
+                    <span class="dashboard-card-title">Vendor Breakdown</span>
                 </div>
                 <div class="dashboard-card-body p-0">
-                    <% if (productBreakdown && productBreakdown.length > 0) { %>
+                    <% if (reportData && reportData.length > 0) { %>
                         <div class="table-responsive">
                             <table class="table custom-table mb-0 align-middle">
                                 <thead>
                                     <tr>
-                                        <th>Product</th>
+                                        <th>Vendor / Shop</th>
+                                        <th>Owner</th>
                                         <th>Units Sold</th>
-                                        <th>Orders Count</th>
+                                        <th>Total Orders</th>
                                         <th>Gross Revenue</th>
-                                        <th>Platform Commission</th>
-                                        <th>Net Earned</th>
+                                        <th>Avg Commission</th>
+                                        <th>Commission Retained</th>
+                                        <th>Net Vendor Payout</th>
+                                        <th class="text-end">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <% productBreakdown.forEach(p => { %>
+                                    <% reportData.forEach(r => { %>
                                         <tr>
-                                            <td class="fw-semibold"><%= p.product_name %></td>
-                                            <td><span class="badge bg-light text-dark border px-2 py-1"><%= p.units_sold %> units</span></td>
-                                            <td><%= p.order_count %> orders</td>
-                                            <td class="fw-bold text-success">₹<%= Number(p.gross_revenue).toFixed(2) %></td>
-                                            <td class="text-danger">-₹<%= Number(p.commission_amount).toFixed(2) %></td>
-                                            <td class="fw-bold">₹<%= Number(p.net_amount).toFixed(2) %></td>
+                                            <td>
+                                                <div class="fw-bold"><a href="/admin/vendors/<%= r.vendor_id %>" class="text-decoration-none text-dark"><%= r.business_name %></a></div>
+                                                <span class="text-muted small">Vendor #<%= r.vendor_id %></span>
+                                            </td>
+                                            <td><%= r.owner_name %></td>
+                                            <td><span class="badge bg-light text-dark border"><%= r.units_sold || 0 %> units</span></td>
+                                            <td class="fw-semibold"><%= r.order_count || 0 %></td>
+                                            <td class="fw-bold text-success">₹<%= Number(r.gross_sales || 0).toFixed(2) %></td>
+                                            <td><%= Number(r.commission_rate || 10).toFixed(1) %>%</td>
+                                            <td class="fw-semibold text-primary">₹<%= Number(r.commission_amount || 0).toFixed(2) %></td>
+                                            <td class="fw-bold">₹<%= Number(r.net_payable || 0).toFixed(2) %></td>
+                                            <td class="text-end">
+                                                <a href="/admin/vendors/<%= r.vendor_id %>" class="btn btn-sm btn-outline-secondary">View Profile</a>
+                                            </td>
                                         </tr>
                                     <% }) %>
                                 </tbody>
@@ -139,8 +152,8 @@
                         </div>
                     <% } else { %>
                         <div class="p-5 text-center text-muted">
-                            <i class="bi bi-bar-chart display-5 d-block mb-3"></i>
-                            No sales data recorded for the selected time window.
+                            <i class="bi bi-file-earmark-bar-graph display-5 d-block mb-3"></i>
+                            No sales data recorded for the selected period.
                         </div>
                     <% } %>
                 </div>
@@ -154,9 +167,11 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function toggleDates(val) {
-            const cols = document.querySelectorAll('.custom-date-col');
-            cols.forEach(el => el.style.display = val === 'custom' ? 'block' : 'none');
+        function toggleCustomDates(val) {
+            const customCols = document.querySelectorAll('.custom-date-col');
+            customCols.forEach(el => {
+                el.style.display = val === 'custom' ? 'block' : 'none';
+            });
         }
     </script>
 </body>

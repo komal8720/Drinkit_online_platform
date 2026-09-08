@@ -59,6 +59,66 @@ async function sendOtpEmail(toEmail, firstName, otpCode) {
     }
 }
 
+/**
+ * Sends a vendor invitation email with a secure activation link.
+ * @param {string} toEmail - Vendor business email
+ * @param {string} businessName - Vendor shop/business name
+ * @param {string} username - Generated vendor username
+ * @param {string} activationLink - Direct activation URL with secure token
+ * @param {number} [expiryHours=48] - Token validity in hours
+ */
+async function sendVendorInvitationEmail(toEmail, businessName, username, activationLink, expiryHours = 48) {
+    try {
+        const mailOptions = {
+            from: process.env.MAIL_FROM || `"Drinkit Platform" drinkit3085@gmail.com`,
+            to: toEmail,
+            subject: `Drinkit - Vendor Invitation for ${businessName}`,
+            text: `Hello,\n\nYou have been invited to join Drinkit as a vendor for ${businessName}.\n\nYour Username: ${username}\n\nPlease activate your account and set your secure password by clicking the link below:\n${activationLink}\n\nThis activation link will expire in ${expiryHours} hours.\n\nRegards,\nDrinkit Operations Team`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e8e4e5; border-radius: 14px; background-color: #ffffff;">
+                    <div style="text-align: center; margin-bottom: 25px; border-bottom: 2px solid #731b32; padding-bottom: 15px;">
+                        <h2 style="color: #731b32; margin: 0; font-size: 26px; letter-spacing: -0.5px;">Drinkit <span style="font-weight: 400; color: #555;">Vendor Portal</span></h2>
+                    </div>
+                    <div style="padding: 10px 0;">
+                        <p style="font-size: 16px; color: #211b1d; line-height: 1.5;">Welcome <strong>${businessName}</strong>,</p>
+                        <p style="font-size: 15px; color: #444; line-height: 1.6;">
+                            Congratulations! Your shop has been registered on the <strong>Drinkit Online Multi-Vendor Platform</strong>.
+                            To start managing your beverage catalog, inventory, and customer orders, please activate your account.
+                        </p>
+                        <div style="background-color: #fdf5f7; border-left: 4px solid #731b32; padding: 14px 18px; border-radius: 6px; margin: 20px 0;">
+                            <p style="margin: 0 0 6px 0; font-size: 14px; color: #555;">Your Assigned Username:</p>
+                            <p style="margin: 0; font-size: 18px; font-weight: 700; color: #731b32;">${username}</p>
+                        </div>
+                        <div style="text-align: center; margin: 35px 0;">
+                            <a href="${activationLink}" style="background-color: #731b32; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 700; display: inline-block; box-shadow: 0 4px 12px rgba(115, 27, 50, 0.25);">
+                                Activate Vendor Account & Set Password
+                            </a>
+                        </div>
+                        <p style="font-size: 13px; color: #777; line-height: 1.5;">
+                            Or copy and paste this link into your browser:<br>
+                            <a href="${activationLink}" style="color: #731b32; word-break: break-all;">${activationLink}</a>
+                        </p>
+                        <p style="font-size: 13px; color: #888; margin-top: 20px;">
+                            ⏱️ This one-time link is valid for <strong>${expiryHours} hours</strong>. For security reasons, never share this link with anyone.
+                        </p>
+                    </div>
+                    <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #e8e4e5; font-size: 12px; color: #888; text-align: center;">
+                        <p style="margin: 0;">Drinkit Multi-Vendor Beverage Delivery Platform<br>This is an automated operational notification.</p>
+                    </div>
+                </div>
+            `
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`✉️ Vendor invitation email sent to ${toEmail}. Message ID: ${info.messageId}`);
+        return true;
+    } catch (error) {
+        console.error("❌ Failed to send vendor invitation email via SMTP:", error.message);
+        throw error;
+    }
+}
+
 module.exports = {
-    sendOtpEmail
+    sendOtpEmail,
+    sendVendorInvitationEmail
 };
